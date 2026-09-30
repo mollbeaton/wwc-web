@@ -7,7 +7,7 @@ const GRID_2 = 'minmax(0, 1.6fr) 70px 90px'
 
 const VARIETIES: ManagementListConfig = {
   title: 'Varieties',
-  subtitle: 'Apple and grape varieties',
+  subtitle: 'Apple, pear and grape varieties',
   addLabel: 'Add variety',
   queryKey: 'varieties',
   api: makeReferenceListApi('/varieties'),
@@ -21,6 +21,7 @@ const VARIETIES: ManagementListConfig = {
       type: 'select',
       options: [
         { value: 'apple', label: 'Apple' },
+        { value: 'pear', label: 'Pear' },
         { value: 'grape', label: 'Grape' },
       ],
     },

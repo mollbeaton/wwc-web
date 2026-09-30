@@ -61,7 +61,9 @@ export function LotPage() {
           {lot.name && <span className={styles.name}>{lot.name}</span>}
         </div>
         <div className={styles.headerMeta}>
-          {lot.product_type && <span className="pill pill--grey">{cap(lot.product_type)}</span>}
+          {(lot.display_type ?? lot.product_type) && (
+            <span className="pill pill--grey">{cap(lot.display_type ?? lot.product_type!)}</span>
+          )}
           <span className={`pill ${pill.cls}`}>{pill.label}</span>
           {lot.sparkling != null && (
             <span className="pill pill--grey">{lot.sparkling ? 'Sparkling' : 'Still'}</span>

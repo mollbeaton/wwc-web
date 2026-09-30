@@ -17,6 +17,8 @@ export interface Lot {
   status: string
   stage: string
   product_type: 'cider' | 'wine' | null
+  // What the lot shows as; perry = pear cider. Falls back to product_type.
+  display_type: 'cider' | 'perry' | 'wine' | null
   current_volume_l: string
   current_vessel_ids: string[]
   latest_sg: string | null

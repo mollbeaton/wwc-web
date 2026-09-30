@@ -5,6 +5,8 @@ export interface TankLot {
   code: string
   name: string | null
   product_type: 'cider' | 'wine' | null
+  // What the lot shows as; perry = pear cider. Falls back to product_type.
+  display_type: 'cider' | 'perry' | 'wine' | null
   varieties: string[]
   current_volume_l: string
   fill_pct: number

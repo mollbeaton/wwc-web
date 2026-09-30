@@ -152,7 +152,7 @@ function VesselCardView({ vessel }: { vessel: VesselCard }) {
 
       <div className={styles.product}>
         {dotClass && <span className={`${styles.dot} ${dotClass}`} />}
-        {lot.product_type ? cap(lot.product_type) : 'Lot'}
+        {(lot.display_type ?? lot.product_type) ? cap(lot.display_type ?? lot.product_type!) : 'Lot'}
         {lot.varieties.length > 0 && (
           <span className={styles.varieties}> · {lot.varieties.slice(0, 3).join(', ')}</span>
         )}

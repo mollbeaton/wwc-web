@@ -181,7 +181,7 @@ function Detail({
 
   return (
     <div className={`card ${styles.panel}`}>
-      <h3 className={styles.panelTitle}>{item ? String(item.name) : `New ${config.title.toLowerCase().replace(/s$/, '')}`}</h3>
+      <h3 className={styles.panelTitle}>{item ? String(item.name) : `New ${config.addLabel.replace(/^Add /i, '').toLowerCase()}`}</h3>
 
       <form onSubmit={onSubmit} className={styles.form}>
         {config.fields.map((f) => (
