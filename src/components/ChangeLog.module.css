@@ -1,0 +1,44 @@
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.empty {
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+.row {
+  border-left: 2px solid var(--border);
+  padding-left: 12px;
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.action {
+  font-weight: 600;
+  font-size: 14px;
+}
+.meta {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+.diff {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+.before {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}
+.arrow {
+  color: var(--ink-muted);
+}
+.after {
+  color: var(--ink);
+}

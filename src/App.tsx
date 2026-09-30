@@ -7,6 +7,7 @@ import { DutyPage } from './pages/duty/DutyPage'
 import { DutySettings } from './pages/duty/DutySettings'
 import { HarvestPage } from './pages/harvests/HarvestPage'
 import { LotPage } from './pages/lots/LotPage'
+import { OrchardsPage } from './pages/manage/OrchardsPage'
 import { Placeholder } from './pages/Placeholder'
 import { TanksPage } from './pages/tanks/TanksPage'
 import { TraceIndex } from './pages/trace/TraceIndex'
@@ -57,7 +58,15 @@ export function App() {
             }
           />
 
-          {MANAGE_LISTS.map((list) => (
+          <Route
+            path="/manage/orchards"
+            element={
+              <RequireRole roles={['admin']}>
+                <OrchardsPage />
+              </RequireRole>
+            }
+          />
+          {MANAGE_LISTS.filter((list) => list.path !== 'orchards').map((list) => (
             <Route
               key={list.path}
               path={`/manage/${list.path}`}
