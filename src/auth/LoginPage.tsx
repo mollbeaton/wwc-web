@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Navigate } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { useAuth } from './AuthContext'
 import styles from './LoginPage.module.css'
@@ -19,11 +20,15 @@ function signInErrorMessage(err: unknown): string {
 }
 
 export function LoginPage() {
-  const { signIn } = useAuth()
+  const { signIn, user } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  // Once signed in, leave the login screen for the app - also covers landing on
+  // /login while already authenticated.
+  if (user) return <Navigate to="/tanks" replace />
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
