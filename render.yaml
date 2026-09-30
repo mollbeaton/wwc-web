@@ -1,40 +1,20 @@
 # Render Blueprint for the Wild West Cider web dashboard.
 #
-# A static SPA: built with Vite, served from ./dist. VITE_API_BASE_URL is a
+# A single production static SPA, built with Vite and served from ./dist over
+# Render's global CDN (static sites aren't region-bound). VITE_API_BASE_URL is a
 # build-time variable Vite inlines into the bundle, so it must point at the
-# deployed wwc-api URL (the API in turn lists this dashboard's origin in its
-# CORS_ALLOW_ORIGINS). The catch-all rewrite sends every path to index.html so
-# React Router handles client-side routing on a hard refresh.
+# deployed wwc-api URL - set it in the Render dashboard (sync:false). The API in
+# turn lists this dashboard's origin in its CORS_ALLOW_ORIGINS.
 #
-# The two repos deploy from separate blueprints, so the cross-origin URLs are
-# set by hand (sync:false) in each Render dashboard rather than wired here.
+# The catch-all rewrite sends every path to index.html so React Router handles
+# client-side routing on a hard refresh.
 
 services:
   - type: web
-    name: wwc-dashboard-staging
+    name: wwc-dashboard
     runtime: static
     branch: main
     autoDeploy: true
-    buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
-    pullRequestPreviewsEnabled: false
-    envVars:
-      - key: VITE_API_BASE_URL
-        sync: false
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    headers:
-      - path: /assets/*
-        name: Cache-Control
-        value: public, max-age=31536000, immutable
-
-  - type: web
-    name: wwc-dashboard-prod
-    runtime: static
-    branch: main
-    autoDeploy: false
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     pullRequestPreviewsEnabled: false
