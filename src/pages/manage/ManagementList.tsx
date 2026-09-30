@@ -34,7 +34,14 @@ export interface ManagementListConfig {
 
 function blankFrom(fields: FieldConfig[]): RefBody {
   const body: RefBody = {}
-  for (const f of fields) body[f.key] = f.type === 'checkbox' ? false : ''
+  for (const f of fields) {
+    if (f.type === 'checkbox') body[f.key] = false
+    // A select must default to its first option: a controlled <select> with a
+    // value matching no <option> shows the first one but leaves state empty,
+    // so an untouched dropdown would submit "" (422 on a required field).
+    else if (f.type === 'select') body[f.key] = f.options?.[0]?.value ?? ''
+    else body[f.key] = ''
+  }
   return body
 }
 
