@@ -8,6 +8,7 @@ import { DutySettings } from './pages/duty/DutySettings'
 import { HarvestPage } from './pages/harvests/HarvestPage'
 import { LotPage } from './pages/lots/LotPage'
 import { OrchardsPage } from './pages/manage/OrchardsPage'
+import { VesselsPage } from './pages/manage/VesselsPage'
 import { Placeholder } from './pages/Placeholder'
 import { TanksPage } from './pages/tanks/TanksPage'
 import { TraceIndex } from './pages/trace/TraceIndex'
@@ -66,7 +67,15 @@ export function App() {
               </RequireRole>
             }
           />
-          {MANAGE_LISTS.filter((list) => list.path !== 'orchards').map((list) => (
+          <Route
+            path="/manage/vessels"
+            element={
+              <RequireRole roles={['admin']}>
+                <VesselsPage />
+              </RequireRole>
+            }
+          />
+          {MANAGE_LISTS.filter((list) => !['orchards', 'vessels'].includes(list.path)).map((list) => (
             <Route
               key={list.path}
               path={`/manage/${list.path}`}
