@@ -81,6 +81,19 @@ export interface LotEvent {
   corrects_event_id: string | null
   is_corrected: boolean
   is_abv_override: boolean
+  correctable: boolean
+  correct_kind: 'addition' | 'loss' | null
+  addition_type: string | null
+  addition_amount: string | null
+  addition_unit: string | null
+  loss_volume_l: string | null
+}
+
+export interface LossCorrection {
+  id: string
+  occurred_at: string
+  volume_l: string
+  reason: string
 }
 
 export const lotsApi = {
@@ -91,4 +104,6 @@ export const lotsApi = {
   backwardTrace: (lotId: string) => api.get<BackwardTrace>(`/lots/${lotId}/trace/backward`),
   forwardTrace: (lotId: string) => api.get<ForwardTraceNode[]>(`/lots/${lotId}/trace/forward`),
   events: (lotId: string) => api.get<LotEvent[]>(`/lots/${lotId}/events`),
+  correctLoss: (lotId: string, lossId: string, body: LossCorrection) =>
+    api.post<unknown>(`/lots/${lotId}/loss/${lossId}/correct`, body),
 }

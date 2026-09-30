@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
 import { IconCheck } from '@tabler/icons-react'
+import { useState } from 'react'
 import { lotsApi, type LotEvent } from '../../api/lots'
+import { useAuth } from '../../auth/AuthContext'
 import { fixed, gbp, shortDate } from '../../lib/format'
+import { CorrectionModal } from './CorrectionModal'
 import styles from './LotPage.module.css'
 
 function dateTime(iso: string): string {
@@ -26,6 +29,9 @@ export function HistoryTab({ lotId }: { lotId: string }) {
     queryKey: ['lot', lotId, 'events'],
     queryFn: () => lotsApi.events(lotId),
   })
+  const { effectiveRole } = useAuth()
+  const isAdmin = effectiveRole === 'admin'
+  const [correcting, setCorrecting] = useState<LotEvent | null>(null)
 
   return (
     <div className={styles.tabBody}>
@@ -102,7 +108,17 @@ export function HistoryTab({ lotId }: { lotId: string }) {
             <span className={styles.num}>Change</span>
             <span className={styles.num}>Balance</span>
           </div>
-          {events.data?.map((e) => <EventRow key={e.id} event={e} />)}
+          {events.data?.map((e) => (
+            <EventRow
+              key={e.id}
+              event={e}
+              onCorrect={
+                isAdmin && e.correctable && e.correct_kind === 'loss'
+                  ? () => setCorrecting(e)
+                  : undefined
+              }
+            />
+          ))}
           {events.data && events.data.length === 0 && (
             <p className={styles.muted} style={{ padding: '12px 22px' }}>
               No events yet.
@@ -110,11 +126,20 @@ export function HistoryTab({ lotId }: { lotId: string }) {
           )}
         </div>
       </div>
+
+      {correcting && (
+        <CorrectionModal
+          lotId={lotId}
+          event={correcting}
+          hasDutyLine={!!duty.data}
+          onClose={() => setCorrecting(null)}
+        />
+      )}
     </div>
   )
 }
 
-function EventRow({ event }: { event: LotEvent }) {
+function EventRow({ event, onCorrect }: { event: LotEvent; onCorrect?: () => void }) {
   const cls = [
     styles.eventRow,
     event.is_corrected ? styles.eventCorrected : '',
@@ -131,7 +156,14 @@ function EventRow({ event }: { event: LotEvent }) {
         {dateTime(event.recorded_at)}
       </span>
       <span className={styles.by}>{event.recorded_by_email ?? '—'}</span>
-      <span>{event.description}</span>
+      <span>
+        {event.description}
+        {onCorrect && (
+          <button className={styles.correctLink} onClick={onCorrect}>
+            Correct
+          </button>
+        )}
+      </span>
       <span className={`mono ${styles.num}`}>{event.change ?? '—'}</span>
       <span className={`mono ${styles.num}`}>
         {event.balance_l != null ? `${fixed(event.balance_l, 1)} L` : '—'}

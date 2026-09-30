@@ -210,6 +210,18 @@
 .eventOverride {
   background: var(--blue-soft);
 }
+.correctLink {
+  margin-left: 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--coral);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.correctLink:hover {
+  text-decoration: underline;
+}
 
 /* Backward trace ------------------------------------------------------- */
 .compRow {
