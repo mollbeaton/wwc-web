@@ -1,0 +1,264 @@
+.muted {
+  color: var(--ink-muted);
+}
+.error {
+  color: var(--coral);
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.breadcrumb:hover {
+  color: var(--ink-2);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+.headerMain {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.code {
+  font-size: 34px;
+  font-weight: 700;
+}
+.name {
+  font-family: var(--font-title);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--ink-2);
+}
+.headerMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.fact {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+}
+.factLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.factValue {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.factSub {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+
+.flags {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.flag {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--coral);
+  background: var(--coral-soft);
+  border-radius: var(--r-card);
+  padding: 12px 16px;
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.flag svg {
+  color: var(--coral);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tabBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.sectionTitle {
+  font-size: 17px;
+  margin: 0 0 14px;
+}
+
+/* Reconciliation ------------------------------------------------------- */
+.recon {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.reconRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+}
+.reconTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--amber);
+}
+.balances {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--green);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.imbalance {
+  margin-top: 8px;
+  color: var(--coral);
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+/* Duty card ------------------------------------------------------------ */
+.dutyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+.dutyFact {
+}
+.dutyStrong {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 6px;
+  color: var(--amber);
+}
+
+/* Backward trace ------------------------------------------------------- */
+.compRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.compRow:last-child {
+  border-bottom: none;
+}
+.compRow .mono {
+  margin-left: auto;
+}
+.compMain {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.compVariety {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.compOrchard {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.dotCider {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+.supplier {
+  padding: 8px 0;
+  font-weight: 600;
+}
+.ancestors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ancestorLink {
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 14px;
+}
+.ancestorLink:hover {
+  text-decoration: underline;
+}
+
+/* Forward trace -------------------------------------------------------- */
+.recallCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+.recallCard {
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+}
+.recall_green {
+  background: var(--green-soft);
+}
+.recall_amber {
+  background: var(--amber-soft);
+}
+.recall_blue {
+  background: var(--blue-soft);
+}
+.recallValue {
+  font-size: 28px;
+  font-weight: 700;
+}
+.recallLabel {
+  font-size: 13px;
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+.descendant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  color: inherit;
+}
+.descendant:last-child {
+  border-bottom: none;
+}
+.descKind {
+  color: var(--ink-muted);
+  font-size: 13.5px;
+  text-transform: capitalize;
+}
+.descendant .pill {
+  margin-left: auto;
+}

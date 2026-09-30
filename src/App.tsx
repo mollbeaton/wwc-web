@@ -5,6 +5,7 @@ import { LoginPage } from './auth/LoginPage'
 import { AppShell } from './layout/AppShell'
 import { DutyPage } from './pages/duty/DutyPage'
 import { DutySettings } from './pages/duty/DutySettings'
+import { LotPage } from './pages/lots/LotPage'
 import { Placeholder } from './pages/Placeholder'
 import { TanksPage } from './pages/tanks/TanksPage'
 
@@ -34,10 +35,7 @@ export function App() {
         >
           <Route index element={<Navigate to="/tanks" replace />} />
           <Route path="/tanks" element={<TanksPage />} />
-          <Route
-            path="/lots/:lotId"
-            element={<Placeholder title="Lot" subtitle="Traceability, reconciliation and duty" spec="WD-12 to WD-14" />}
-          />
+          <Route path="/lots/:lotId" element={<LotPage />} />
           <Route
             path="/trace"
             element={<Placeholder title="Trace" subtitle="What went into this, and where it went" spec="WD-11 to WD-16" />}

@@ -1,0 +1,76 @@
+import { api } from './client'
+import type { DutyLine } from './duty'
+
+export interface LotComposition {
+  variety: string
+  volume_l: string
+  harvest_id: string
+  harvest_code: string
+  harvested_on: string
+  orchard_name: string
+}
+
+export interface Lot {
+  id: string
+  code: string
+  name: string | null
+  status: string
+  stage: string
+  product_type: 'cider' | 'wine' | null
+  current_volume_l: string
+  current_vessel_ids: string[]
+  latest_sg: string | null
+  abv: string | null
+  abv_method: 'calculated' | 'manual' | null
+  kind: string
+  unit_volume_l: string | null
+  unit_count: number | null
+  sparkling: boolean | null
+  closure: string | null
+  labelled_at: string | null
+  composition: LotComposition[]
+  parent_lot_ids: string[]
+  ready_for_sale_volume_l: string
+  lost_volume_l: string
+}
+
+export interface Reconciliation {
+  lot_id: string
+  starting_volume_l: string
+  lost_volume_l: string
+  split_off_volume_l: string
+  current_volume_l: string
+  reconciles: boolean
+}
+
+export interface AdditionSummary {
+  lot_id: string
+  kind: string
+  amount: string
+  unit: string
+  occurred_at: string
+}
+
+export interface BackwardTrace {
+  lot_id: string
+  ancestor_lot_ids: string[]
+  additions: AdditionSummary[]
+  intake_suppliers: string[]
+  composition: LotComposition[]
+}
+
+export interface ForwardTraceNode {
+  lot_id: string
+  code: string
+  kind: string
+  status: string
+  is_ready_for_sale: boolean
+}
+
+export const lotsApi = {
+  get: (lotId: string) => api.get<Lot>(`/lots/${lotId}`),
+  reconciliation: (lotId: string) => api.get<Reconciliation>(`/lots/${lotId}/reconciliation`),
+  dutyLine: (lotId: string) => api.get<DutyLine | null>(`/lots/${lotId}/duty`),
+  backwardTrace: (lotId: string) => api.get<BackwardTrace>(`/lots/${lotId}/trace/backward`),
+  forwardTrace: (lotId: string) => api.get<ForwardTraceNode[]>(`/lots/${lotId}/trace/forward`),
+}
