@@ -119,11 +119,7 @@ export function HistoryTab({ lotId }: { lotId: string }) {
             <EventRow
               key={e.id}
               event={e}
-              onCorrect={
-                isAdmin && e.correctable && e.correct_kind === 'loss'
-                  ? () => setCorrecting(e)
-                  : undefined
-              }
+              onCorrect={isAdmin && e.correctable ? () => setCorrecting(e) : undefined}
             />
           ))}
           {events.data && events.data.length === 0 && (

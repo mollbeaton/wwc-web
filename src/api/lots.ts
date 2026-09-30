@@ -97,6 +97,15 @@ export interface LossCorrection {
   reason: string
 }
 
+export interface AdditionCorrection {
+  id: string
+  kind: string
+  amount: string
+  unit: string
+  occurred_at: string
+  note: string
+}
+
 export const lotsApi = {
   list: () => api.get<Lot[]>('/lots'),
   get: (lotId: string) => api.get<Lot>(`/lots/${lotId}`),
@@ -107,4 +116,6 @@ export const lotsApi = {
   events: (lotId: string) => api.get<LotEvent[]>(`/lots/${lotId}/events`),
   correctLoss: (lotId: string, lossId: string, body: LossCorrection) =>
     api.post<unknown>(`/lots/${lotId}/loss/${lossId}/correct`, body),
+  correctAddition: (lotId: string, additionId: string, body: AdditionCorrection) =>
+    api.post<unknown>(`/lots/${lotId}/additions/${additionId}/correct`, body),
 }

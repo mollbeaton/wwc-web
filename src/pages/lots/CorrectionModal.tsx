@@ -7,9 +7,9 @@ import styles from './CorrectionModal.module.css'
 
 type Mode = 'value' | 'time'
 
-/** WD-40: correct a loss entry - a new amount or the time it happened, plus a
- *  required reason. Saving adds a correction event referencing the original;
- *  nothing is edited in place. */
+/** WD-40/CH-04: correct a loss or addition entry - a new amount or the time it
+ *  happened, plus a required reason. Saving adds a correction event referencing
+ *  the original; nothing is edited in place. */
 export function CorrectionModal({
   lotId,
   event,
@@ -22,22 +22,34 @@ export function CorrectionModal({
   onClose: () => void
 }) {
   const queryClient = useQueryClient()
+  const isLoss = event.correct_kind === 'loss'
+  const currentValue = isLoss ? (event.loss_volume_l ?? '') : (event.addition_amount ?? '')
+  const unit = isLoss ? 'L' : (event.addition_unit ?? '')
+
   const [mode, setMode] = useState<Mode>('value')
-  const [volume, setVolume] = useState(event.loss_volume_l ?? '')
+  const [value, setValue] = useState(currentValue)
   // datetime-local wants "YYYY-MM-DDTHH:mm".
   const [when, setWhen] = useState(new Date(event.occurred_at).toISOString().slice(0, 16))
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const save = useMutation({
-    mutationFn: () =>
-      lotsApi.correctLoss(lotId, event.id, {
-        id: crypto.randomUUID(),
-        occurred_at:
-          mode === 'time' ? new Date(when).toISOString() : event.occurred_at,
-        volume_l: mode === 'value' ? volume : (event.loss_volume_l ?? volume),
-        reason,
-      }),
+    mutationFn: () => {
+      const id = crypto.randomUUID()
+      const occurred_at = mode === 'time' ? new Date(when).toISOString() : event.occurred_at
+      const amount = mode === 'value' ? value : currentValue
+      if (isLoss) {
+        return lotsApi.correctLoss(lotId, event.id, { id, occurred_at, volume_l: amount, reason })
+      }
+      return lotsApi.correctAddition(lotId, event.id, {
+        id,
+        occurred_at,
+        kind: event.addition_type ?? '',
+        amount,
+        unit,
+        note: reason,
+      })
+    },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['lot', lotId] })
       onClose()
@@ -45,7 +57,7 @@ export function CorrectionModal({
     onError: (e) => setError(e instanceof ApiError ? e.message : 'Could not save the correction'),
   })
 
-  const valid = reason.trim().length > 0 && (mode === 'time' || Number(volume) > 0)
+  const valid = reason.trim().length > 0 && (mode === 'time' || Number(value) > 0)
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -56,7 +68,7 @@ export function CorrectionModal({
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <form className={styles.modal} onClick={(e) => e.stopPropagation()} onSubmit={onSubmit}>
-        <h3 className={styles.title}>Correct this loss</h3>
+        <h3 className={styles.title}>Correct this {isLoss ? 'loss' : 'addition'}</h3>
         <p className={styles.sub}>{event.description} · {event.change}</p>
 
         <div className={styles.modes}>
@@ -78,13 +90,13 @@ export function CorrectionModal({
 
         {mode === 'value' ? (
           <label className={styles.field}>
-            <span>New volume (L)</span>
+            <span>New {isLoss ? 'volume (L)' : `amount (${unit})`}</span>
             <input
               type="number"
               min="0"
               step="0.01"
-              value={volume}
-              onChange={(e) => setVolume(e.target.value)}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
               autoFocus
             />
           </label>
