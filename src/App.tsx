@@ -8,22 +8,22 @@ import { DutySettings } from './pages/duty/DutySettings'
 import { HarvestPage } from './pages/harvests/HarvestPage'
 import { LotPage } from './pages/lots/LotPage'
 import { OrchardsPage } from './pages/manage/OrchardsPage'
+import {
+  AdditivesPage,
+  LossReasonsPage,
+  PackagingPage,
+  SuppliersPage,
+  VarietiesPage,
+} from './pages/manage/referenceListPages'
 import { UsersPage } from './pages/manage/UsersPage'
 import { VesselsPage } from './pages/manage/VesselsPage'
-import { Placeholder } from './pages/Placeholder'
 import { TanksPage } from './pages/tanks/TanksPage'
 import { TraceIndex } from './pages/trace/TraceIndex'
+import type { ReactNode } from 'react'
 
-const MANAGE_LISTS: { path: string; title: string; subtitle: string }[] = [
-  { path: 'users', title: 'Users', subtitle: 'Who can sign in, and what they can do' },
-  { path: 'orchards', title: 'Orchards', subtitle: 'Where the fruit is grown' },
-  { path: 'varieties', title: 'Varieties', subtitle: 'Apple and grape varieties' },
-  { path: 'additives', title: 'Additives', subtitle: 'What can be added to a lot' },
-  { path: 'suppliers', title: 'Suppliers & canners', subtitle: 'Bought-in juice and canning partners' },
-  { path: 'packaging', title: 'Packaging', subtitle: 'Bottle, can and bag formats' },
-  { path: 'loss-reasons', title: 'Loss reasons', subtitle: 'Why volume left a lot' },
-  { path: 'vessels', title: 'Vessels', subtitle: 'Tanks, barrels and other vessels' },
-]
+const AdminOnly = ({ children }: { children: ReactNode }) => (
+  <RequireRole roles={['admin']}>{children}</RequireRole>
+)
 
 export function App() {
   return (
@@ -76,25 +76,12 @@ export function App() {
               </RequireRole>
             }
           />
-          <Route
-            path="/manage/users"
-            element={
-              <RequireRole roles={['admin']}>
-                <UsersPage />
-              </RequireRole>
-            }
-          />
-          {MANAGE_LISTS.filter((list) => !['orchards', 'vessels', 'users'].includes(list.path)).map((list) => (
-            <Route
-              key={list.path}
-              path={`/manage/${list.path}`}
-              element={
-                <RequireRole roles={['admin']}>
-                  <Placeholder title={list.title} subtitle={list.subtitle} spec="WD-29 to WD-38" />
-                </RequireRole>
-              }
-            />
-          ))}
+          <Route path="/manage/users" element={<AdminOnly><UsersPage /></AdminOnly>} />
+          <Route path="/manage/varieties" element={<AdminOnly><VarietiesPage /></AdminOnly>} />
+          <Route path="/manage/additives" element={<AdminOnly><AdditivesPage /></AdminOnly>} />
+          <Route path="/manage/suppliers" element={<AdminOnly><SuppliersPage /></AdminOnly>} />
+          <Route path="/manage/packaging" element={<AdminOnly><PackagingPage /></AdminOnly>} />
+          <Route path="/manage/loss-reasons" element={<AdminOnly><LossReasonsPage /></AdminOnly>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/tanks" replace />} />
