@@ -40,6 +40,13 @@ export function HistoryTab({ lotId }: { lotId: string }) {
         {recon.data && (
           <div className={styles.recon}>
             <ReconRow label="Started with" value={`${fixed(recon.data.starting_volume_l, 1)} L`} />
+            {Number(recon.data.water_added_l) > 0 && (
+              <ReconRow
+                label="Water added"
+                value={`+ ${fixed(recon.data.water_added_l, 1)} L`}
+                muted
+              />
+            )}
             <ReconRow
               label="Losses"
               value={`− ${fixed(recon.data.lost_volume_l, 1)} L`}

@@ -37,6 +37,7 @@ export interface Lot {
 export interface Reconciliation {
   lot_id: string
   starting_volume_l: string
+  water_added_l: string
   lost_volume_l: string
   split_off_volume_l: string
   current_volume_l: string
