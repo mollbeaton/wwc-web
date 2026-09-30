@@ -3,6 +3,7 @@ import { AuthProvider } from './auth/AuthContext'
 import { RequireAuth, RequireRole } from './auth/guards'
 import { LoginPage } from './auth/LoginPage'
 import { AppShell } from './layout/AppShell'
+import { DutyPage } from './pages/duty/DutyPage'
 import { Placeholder } from './pages/Placeholder'
 
 const MANAGE_LISTS: { path: string; title: string; subtitle: string }[] = [
@@ -42,7 +43,7 @@ export function App() {
             path="/duty"
             element={
               <RequireRole roles={['admin', 'viewer']}>
-                <Placeholder title="Duty" subtitle="Monthly Alcohol Duty and Small Producer Relief" spec="WD-17 to WD-25" />
+                <DutyPage />
               </RequireRole>
             }
           />

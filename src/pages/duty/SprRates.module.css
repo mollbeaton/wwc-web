@@ -1,0 +1,108 @@
+.yearChips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.yearChip {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 14px;
+}
+.yearActive,
+.yearActive:hover {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.demoNote {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.demoNote strong {
+  color: var(--amber);
+}
+
+.basis {
+  color: var(--ink-2);
+  font-size: 14.5px;
+  margin: 0 0 18px;
+  max-width: 70ch;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+.error {
+  color: var(--coral);
+}
+
+.tableHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.tableName {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 16px;
+}
+.tableApplies {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+.perLitre {
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+.perLitre .mono {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--amber);
+}
+.perLitreUnit {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.working {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.charged {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.hmrcLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 14px;
+}
+.hmrcLink:hover {
+  text-decoration: underline;
+}
