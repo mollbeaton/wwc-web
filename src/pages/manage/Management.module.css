@@ -20,6 +20,29 @@
   }
 }
 
+.roleCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.roleCard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+}
+.roleName {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 15px;
+}
+.roleBlurb {
+  font-size: 13px;
+  color: var(--ink-muted);
+  margin-top: 3px;
+}
+
 .tableCard {
   padding: 0;
   overflow: hidden;
@@ -31,6 +54,9 @@
   align-items: center;
   padding: 12px 20px;
   text-align: left;
+}
+.userRow {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) 90px 110px 110px;
 }
 .head {
   font-family: var(--font-title);
