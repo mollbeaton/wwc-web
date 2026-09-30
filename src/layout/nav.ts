@@ -1,4 +1,5 @@
 import {
+  IconAdjustments,
   IconBottle,
   IconBuildingWarehouse,
   IconCurrencyPound,
@@ -29,6 +30,7 @@ export const MAIN_NAV: NavItem[] = [
   { to: '/tanks', label: 'Tanks', icon: IconBuildingWarehouse, roles: ALL },
   { to: '/trace', label: 'Trace', icon: IconDroplet, roles: ALL },
   { to: '/duty', label: 'Duty', icon: IconCurrencyPound, roles: ['admin', 'viewer'] },
+  { to: '/duty-settings', label: 'Duty settings', icon: IconAdjustments, roles: ['admin'] },
 ]
 
 // Everything under Manage is admin only (WD-29 to WD-38).

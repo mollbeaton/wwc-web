@@ -85,6 +85,46 @@ export interface FiledMonth {
   filed_at: string
 }
 
+export interface ProductionMonth {
+  year: number
+  month: number
+  hl_pure_alcohol: string
+}
+
+export interface ProductionAccount {
+  production_year: number
+  months: ProductionMonth[]
+  year_total_hl: string
+}
+
+export interface FullRate {
+  category: string
+  category_label: string
+  rate_per_lpa: string
+  effective_from: string
+}
+
+export interface SprBand {
+  band_start_hl: string
+  band_end_hl: string
+  marginal_per_hl: string
+  cumulative_gbp: string
+}
+
+export interface SprTable {
+  spr_table: string
+  spr_table_label: string
+  applies_to: string
+  effective_from: string | null
+  bands: SprBand[]
+}
+
+export interface OpeningProduction {
+  production_year: number
+  hl_pure_alcohol: string
+  note: string | null
+}
+
 export const dutyApi = {
   monthlyReturn: (year: number, month: number) =>
     api.get<MonthlyReturn>(`/duty/return/${year}/${month}`),
@@ -92,4 +132,15 @@ export const dutyApi = {
     api.post<void>('/duty/return/file', { period_year: year, period_month: month }),
   filedMonths: () => api.get<FiledMonth[]>('/duty/filed-months'),
   sprRates: (productionYear: number) => api.get<SprRates>(`/duty/spr-rates/${productionYear}`),
+  productionAccount: (productionYear: number) =>
+    api.get<ProductionAccount>(`/duty/production-account/${productionYear}`),
+  fullRates: () => api.get<FullRate[]>('/duty/reference/full-rates'),
+  sprTables: () => api.get<SprTable[]>('/duty/reference/spr-tables'),
+  openingProduction: () => api.get<OpeningProduction[]>('/duty/reference/opening-production'),
+  setOpeningProduction: (production_year: number, hl_pure_alcohol: string, note: string | null) =>
+    api.put<OpeningProduction>('/duty/reference/opening-production', {
+      production_year,
+      hl_pure_alcohol,
+      note,
+    }),
 }

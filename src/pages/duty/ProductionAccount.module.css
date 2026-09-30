@@ -1,0 +1,64 @@
+.yearChips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.yearChip {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 14px;
+}
+.yearActive,
+.yearActive:hover {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.sub {
+  color: var(--ink-muted);
+  font-size: 14.5px;
+  margin: 0 0 18px;
+  max-width: 70ch;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+.error {
+  color: var(--coral);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.row:last-child {
+  border-bottom: none;
+}
+.num {
+  text-align: right;
+}
+.head {
+  font-family: var(--font-title);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.empty {
+  padding: 16px 20px;
+  color: var(--ink-muted);
+}
+.total {
+  font-weight: 700;
+  border-top: 2px solid var(--border-strong);
+}

@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { IconAlertTriangle, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { dutyApi, type DutyLine, type MonthlyReturn as MonthlyReturnData } from '../../api/duty'
-import { ApiError } from '../../api/client'
+import { ApiError, downloadFile } from '../../api/client'
 import { useAuth } from '../../auth/AuthContext'
 import { gbp, fixed, monthLabel, shortDate } from '../../lib/format'
 import styles from './MonthlyReturn.module.css'
@@ -45,6 +45,14 @@ export function MonthlyReturn() {
     await queryClient.invalidateQueries({ queryKey: ['duty'] })
   }
 
+  function exportCsv() {
+    const { year, month } = selected
+    void downloadFile(
+      `/duty/return/${year}/${month}/csv`,
+      `duty-${year}-${String(month).padStart(2, '0')}.csv`,
+    )
+  }
+
   return (
     <div>
       <div className={styles.chips}>
@@ -79,6 +87,7 @@ export function MonthlyReturn() {
           data={returnQuery.data}
           canFile={effectiveRole === 'admin'}
           onFile={markFiled}
+          onExport={exportCsv}
         />
       )}
     </div>
@@ -89,10 +98,12 @@ function ReturnBody({
   data,
   canFile,
   onFile,
+  onExport,
 }: {
   data: MonthlyReturnData
   canFile: boolean
   onFile: () => void
+  onExport: () => void
 }) {
   const hasLines = data.groups.length > 0 || data.adjustments.length > 0
 
@@ -109,7 +120,7 @@ function ReturnBody({
           )}
         </div>
         <div className={styles.statusActions}>
-          <button className="btn" disabled title="CSV export coming soon">
+          <button className="btn" onClick={onExport}>
             Export CSV
           </button>
           {canFile && !data.filed && (

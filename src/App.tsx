@@ -4,6 +4,7 @@ import { RequireAuth, RequireRole } from './auth/guards'
 import { LoginPage } from './auth/LoginPage'
 import { AppShell } from './layout/AppShell'
 import { DutyPage } from './pages/duty/DutyPage'
+import { DutySettings } from './pages/duty/DutySettings'
 import { Placeholder } from './pages/Placeholder'
 
 const MANAGE_LISTS: { path: string; title: string; subtitle: string }[] = [
@@ -44,6 +45,14 @@ export function App() {
             element={
               <RequireRole roles={['admin', 'viewer']}>
                 <DutyPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/duty-settings"
+            element={
+              <RequireRole roles={['admin']}>
+                <DutySettings />
               </RequireRole>
             }
           />
