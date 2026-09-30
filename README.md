@@ -41,8 +41,22 @@ and seed a user with `uv run wwc-api create-user --email you@example.com --role 
 ## Production
 
 The app is a static SPA. `npm run build` emits `dist/`. In production it hits the
-API directly via `VITE_API_BASE_URL` (e.g. `https://api.example.com`), and the
-API must list the dashboard's origin in `CORS_ALLOW_ORIGINS`.
+API directly via **`VITE_API_BASE_URL`** (a build-time variable Vite inlines,
+e.g. `https://wwc-api-prod.onrender.com`), and the API must list this dashboard's
+origin in **`CORS_ALLOW_ORIGINS`** — see the API repo's README.
+
+### Deploying to Render
+
+`render.yaml` here is a [Render Blueprint](https://render.com/docs/blueprint-spec)
+defining `wwc-dashboard-staging` (auto-deploys on push to `main`) and
+`wwc-dashboard-prod` (manual deploy), both static sites that build with
+`npm ci && npm run build` and publish `dist/`, with a catch-all rewrite to
+`index.html` for client-side routing.
+
+One-time: Render → **New → Blueprint** → point at this repo. Then set
+`VITE_API_BASE_URL` on each service to the matching API URL, and set the API's
+`CORS_ALLOW_ORIGINS` to this dashboard's URL. The API and dashboard deploy from
+separate blueprints, so those two cross-origin URLs are the only manual wiring.
 
 ## Scripts
 
