@@ -1,0 +1,57 @@
+/*
+ * Design tokens from the v3 handoff (design_handoff_wild_west_cider_dashboard).
+ * These are the single source of truth for colour, type, radii and elevation -
+ * components reference the variables, never raw hex.
+ */
+:root {
+  /* Surfaces */
+  --bg: #101215;
+  --panel: #16191d;
+  --surface: #1c1f24;
+  --surface-2: #191c20;
+  --chip: #272b32;
+
+  /* Borders */
+  --border: #2f353d;
+  --border-strong: #434b56;
+
+  /* Ink */
+  --ink: #f3f4f6;
+  --ink-2: #c6cbd2;
+  --ink-muted: #979ea8;
+  --ink-placeholder: #6f7680;
+
+  /* Accents + soft tints */
+  --amber: #eeb04a;
+  --amber-soft: rgba(238, 176, 74, 0.13);
+  --green: #7fd197;
+  --green-soft: rgba(127, 209, 151, 0.14);
+  --coral: #f39a66;
+  --coral-soft: rgba(243, 154, 102, 0.12);
+  --blue: #8cc0ea;
+  --blue-soft: rgba(140, 192, 234, 0.12);
+  --grape: #e0708a;
+
+  /* On-amber text (primary button label) */
+  --on-amber: #121417;
+
+  /* Type */
+  --font-title: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-ui: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* Radii */
+  --r-segment: 7px;
+  --r-input: 10px;
+  --r-card: 16px;
+  --r-modal: 18px;
+  --r-pill: 999px;
+
+  /* Elevation */
+  --modal-backdrop: rgba(6, 7, 9, 0.7);
+  --modal-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+  /* Layout */
+  --sidebar-w: 224px;
+  --content-pad-x: clamp(16px, 3vw, 36px);
+}

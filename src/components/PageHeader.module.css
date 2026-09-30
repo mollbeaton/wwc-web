@@ -1,0 +1,22 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.title {
+  font-size: 30px;
+  letter-spacing: -0.01em;
+}
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--ink-muted);
+  font-size: 15px;
+  font-weight: 500;
+}
+.actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
