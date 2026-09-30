@@ -12,6 +12,7 @@ const VARIETIES: ManagementListConfig = {
   queryKey: 'varieties',
   api: makeReferenceListApi('/varieties'),
   gridTemplate: GRID_3,
+  filterField: 'fruit',
   columns: [{ key: 'name', label: 'Name' }, { key: 'fruit', label: 'Fruit' }, usedColumn],
   fields: [
     { key: 'name', label: 'Name', type: 'text' },
@@ -61,6 +62,7 @@ const SUPPLIERS: ManagementListConfig = {
   queryKey: 'suppliers',
   api: makeReferenceListApi('/suppliers'),
   gridTemplate: GRID_3,
+  filterField: 'kind',
   columns: [{ key: 'name', label: 'Name' }, { key: 'kind', label: 'Kind' }, usedColumn],
   fields: [
     { key: 'name', label: 'Name', type: 'text' },
@@ -86,6 +88,7 @@ const PACKAGING: ManagementListConfig = {
   queryKey: 'packaging',
   api: makeReferenceListApi('/packaging'),
   gridTemplate: GRID_3,
+  filterField: 'kind',
   columns: [{ key: 'name', label: 'Name' }, { key: 'kind', label: 'Kind' }, usedColumn],
   fields: [
     { key: 'name', label: 'Name', type: 'text' },

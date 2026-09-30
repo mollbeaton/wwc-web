@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { IconPlus } from '@tabler/icons-react'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { ApiError } from '../../api/client'
 import type { RefBody, RefItem, ReferenceListApi } from '../../api/referenceLists'
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
+import { Segmented } from '../../components/Segmented'
 import styles from './Management.module.css'
 
 export interface FieldConfig {
@@ -30,6 +31,9 @@ export interface ManagementListConfig {
   fields: FieldConfig[]
   /** Grid template for the table rows, matching columns + status. */
   gridTemplate: string
+  /** Key of a select field to offer as a category filter (e.g. 'fruit').
+   * Its options drive the filter; omit for search-only pages. */
+  filterField?: string
 }
 
 function blankFrom(fields: FieldConfig[]): RefBody {
@@ -50,6 +54,8 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
   const [showRetired, setShowRetired] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
+  const [filterValue, setFilterValue] = useState('all')
 
   const list = useQuery({
     queryKey: [config.queryKey, showRetired],
@@ -60,6 +66,18 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
   const items = list.data ?? []
   const retiredCount = items.filter((i) => i.status === 'retired').length
   const selected = items.find((i) => i.id === selectedId) ?? null
+
+  // A select field, when named, doubles as a category filter (its options + All).
+  const filterConfig = config.filterField
+    ? config.fields.find((f) => f.key === config.filterField)
+    : undefined
+  const q = query.trim().toLowerCase()
+  const visible = items.filter((item) => {
+    if (filterConfig && filterValue !== 'all' && String(item[filterConfig.key] ?? '') !== filterValue) {
+      return false
+    }
+    return q === '' || String(item.name ?? '').toLowerCase().includes(q)
+  })
 
   return (
     <div>
@@ -79,6 +97,27 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
         }
       />
 
+      <div className={styles.toolbar}>
+        <div className={styles.search}>
+          <IconSearch size={16} stroke={2} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={`Search ${config.title.toLowerCase()}`}
+            aria-label={`Search ${config.title.toLowerCase()}`}
+          />
+        </div>
+        {filterConfig && (
+          <Segmented
+            label={filterConfig.label}
+            options={[{ value: 'all', label: 'All' }, ...(filterConfig.options ?? [])]}
+            value={filterValue}
+            onChange={setFilterValue}
+          />
+        )}
+      </div>
+
       <label className={styles.retiredToggle}>
         <input type="checkbox" checked={showRetired} onChange={(e) => setShowRetired(e.target.checked)} />
         Show retired ({retiredCount})
@@ -92,7 +131,7 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
             ))}
             <span>Status</span>
           </div>
-          {items.map((item) => (
+          {visible.map((item) => (
             <button
               key={item.id}
               className={`${styles.row} ${styles.rowButton} ${item.id === selectedId ? styles.selected : ''}`}
@@ -112,7 +151,9 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
               </span>
             </button>
           ))}
-          {items.length === 0 && <p className={styles.empty}>Nothing here yet.</p>}
+          {visible.length === 0 && (
+            <p className={styles.empty}>{items.length === 0 ? 'Nothing here yet.' : 'No matches.'}</p>
+          )}
         </div>
 
         {(creating || selected) && (

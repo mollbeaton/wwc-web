@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { IconPlus } from '@tabler/icons-react'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { orchardsApi, type Orchard, type OrchardInput } from '../../api/management'
@@ -14,6 +14,7 @@ export function OrchardsPage() {
   const [showRetired, setShowRetired] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
 
   const list = useQuery({
     queryKey: ['orchards', showRetired],
@@ -24,6 +25,11 @@ export function OrchardsPage() {
   const orchards = list.data ?? []
   const retiredCount = orchards.filter((o) => o.status === 'retired').length
   const selected = orchards.find((o) => o.id === selectedId) ?? null
+
+  const q = query.trim().toLowerCase()
+  const visible = orchards.filter((o) =>
+    q === '' || [o.name, o.location, o.grower].some((v) => (v ?? '').toLowerCase().includes(q)),
+  )
 
   return (
     <div>
@@ -43,6 +49,19 @@ export function OrchardsPage() {
         }
       />
 
+      <div className={styles.toolbar}>
+        <div className={styles.search}>
+          <IconSearch size={16} stroke={2} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search orchards"
+            aria-label="Search orchards"
+          />
+        </div>
+      </div>
+
       <label className={styles.retiredToggle}>
         <input
           type="checkbox"
@@ -61,7 +80,7 @@ export function OrchardsPage() {
             <span className={styles.num}>Used</span>
             <span>Status</span>
           </div>
-          {orchards.map((o) => (
+          {visible.map((o) => (
             <button
               key={o.id}
               className={`${styles.row} ${styles.rowButton} ${o.id === selectedId ? styles.selected : ''}`}
@@ -79,7 +98,9 @@ export function OrchardsPage() {
               </span>
             </button>
           ))}
-          {orchards.length === 0 && <p className={styles.empty}>No orchards yet.</p>}
+          {visible.length === 0 && (
+            <p className={styles.empty}>{orchards.length === 0 ? 'No orchards yet.' : 'No matches.'}</p>
+          )}
         </div>
 
         {(creating || selected) && (

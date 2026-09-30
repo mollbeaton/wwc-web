@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { IconPlus } from '@tabler/icons-react'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { usersApi, type User, type UserCreateInput } from '../../api/management'
@@ -26,11 +26,17 @@ export function UsersPage() {
   const queryClient = useQueryClient()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
 
   const list = useQuery({ queryKey: ['users'], queryFn: usersApi.list })
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['users'] })
   const users = list.data ?? []
   const selected = users.find((u) => u.id === selectedId) ?? null
+
+  const q = query.trim().toLowerCase()
+  const visible = users.filter((u) =>
+    q === '' || [u.name, u.email, roleLabel(u.role)].some((s) => (s ?? '').toLowerCase().includes(q)),
+  )
 
   return (
     <div>
@@ -59,6 +65,19 @@ export function UsersPage() {
         ))}
       </div>
 
+      <div className={styles.toolbar}>
+        <div className={styles.search}>
+          <IconSearch size={16} stroke={2} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search users"
+            aria-label="Search users"
+          />
+        </div>
+      </div>
+
       <div className={styles.layout}>
         <div className={`card ${styles.tableCard}`}>
           <div className={`${styles.row} ${styles.userRow} ${styles.head}`}>
@@ -68,7 +87,7 @@ export function UsersPage() {
             <span>Last sign-in</span>
             <span>Status</span>
           </div>
-          {users.map((u) => (
+          {visible.map((u) => (
             <button
               key={u.id}
               className={`${styles.row} ${styles.userRow} ${styles.rowButton} ${u.id === selectedId ? styles.selected : ''}`}
@@ -86,7 +105,9 @@ export function UsersPage() {
               </span>
             </button>
           ))}
-          {users.length === 0 && <p className={styles.empty}>No users.</p>}
+          {visible.length === 0 && (
+            <p className={styles.empty}>{users.length === 0 ? 'No users.' : 'No matches.'}</p>
+          )}
         </div>
 
         {(creating || selected) && (

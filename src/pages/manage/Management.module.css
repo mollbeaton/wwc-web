@@ -1,3 +1,39 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin-bottom: 14px;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 220px;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: var(--r-input);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+}
+.search:focus-within {
+  border-color: var(--amber);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--ink);
+  font: inherit;
+}
+.search input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+
 .retiredToggle {
   display: inline-flex;
   align-items: center;

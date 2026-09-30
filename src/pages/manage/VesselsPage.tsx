@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { IconPlus } from '@tabler/icons-react'
+import { IconPlus, IconSearch } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { VESSEL_TYPES, vesselsApi, type Vessel, type VesselInput } from '../../api/vessels'
@@ -19,14 +19,20 @@ export function VesselsPage() {
   const [showRetired, setShowRetired] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
+  const [query, setQuery] = useState('')
 
   const list = useQuery({ queryKey: ['vessels'], queryFn: vesselsApi.list })
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['vessels'] })
 
   const all = list.data ?? []
   const retiredCount = all.filter((v) => v.status === 'retired').length
-  const vessels = showRetired ? all : all.filter((v) => v.status === 'active')
+  const byStatus = showRetired ? all : all.filter((v) => v.status === 'active')
   const selected = all.find((v) => v.id === selectedId) ?? null
+
+  const q = query.trim().toLowerCase()
+  const vessels = byStatus.filter((v) =>
+    q === '' || [v.code, v.name, v.type].some((s) => (s ?? '').toLowerCase().includes(q)),
+  )
 
   return (
     <div>
@@ -45,6 +51,19 @@ export function VesselsPage() {
           </button>
         }
       />
+
+      <div className={styles.toolbar}>
+        <div className={styles.search}>
+          <IconSearch size={16} stroke={2} />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search vessels"
+            aria-label="Search vessels"
+          />
+        </div>
+      </div>
 
       <label className={styles.retiredToggle}>
         <input type="checkbox" checked={showRetired} onChange={(e) => setShowRetired(e.target.checked)} />
@@ -81,7 +100,9 @@ export function VesselsPage() {
               </span>
             </button>
           ))}
-          {vessels.length === 0 && <p className={styles.empty}>No vessels.</p>}
+          {vessels.length === 0 && (
+            <p className={styles.empty}>{byStatus.length === 0 ? 'No vessels.' : 'No matches.'}</p>
+          )}
         </div>
 
         {(creating || selected) && (
