@@ -6,6 +6,7 @@ import { VESSEL_TYPES, vesselsApi, type Vessel, type VesselInput } from '../../a
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
 import { fixed } from '../../lib/format'
+import { ListState } from './ListState'
 import styles from './Management.module.css'
 
 const BLANK: VesselInput = { code: '', name: '', capacity_l: '', type: 'tank' }
@@ -100,9 +101,13 @@ export function VesselsPage() {
               </span>
             </button>
           ))}
-          {vessels.length === 0 && (
-            <p className={styles.empty}>{byStatus.length === 0 ? 'No vessels.' : 'No matches.'}</p>
-          )}
+          <ListState
+            isPending={list.isPending}
+            isError={list.isError}
+            isEmpty={vessels.length === 0}
+            emptyLabel={byStatus.length === 0 ? 'No vessels.' : 'No matches.'}
+            onRetry={() => list.refetch()}
+          />
         </div>
 
         {(creating || selected) && (

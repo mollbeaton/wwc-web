@@ -6,6 +6,7 @@ import type { RefBody, RefItem, ReferenceListApi } from '../../api/referenceList
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
 import { Segmented } from '../../components/Segmented'
+import { ListState } from './ListState'
 import styles from './Management.module.css'
 
 export interface FieldConfig {
@@ -151,9 +152,13 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
               </span>
             </button>
           ))}
-          {visible.length === 0 && (
-            <p className={styles.empty}>{items.length === 0 ? 'Nothing here yet.' : 'No matches.'}</p>
-          )}
+          <ListState
+            isPending={list.isPending}
+            isError={list.isError}
+            isEmpty={visible.length === 0}
+            emptyLabel={items.length === 0 ? 'Nothing here yet.' : 'No matches.'}
+            onRetry={() => list.refetch()}
+          />
         </div>
 
         {(creating || selected) && (
@@ -161,6 +166,7 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
             key={selected?.id ?? 'new'}
             config={config}
             item={creating ? null : selected}
+            existingNames={items.map((i) => String(i.name ?? ''))}
             onDone={() => {
               setCreating(false)
               invalidate()
@@ -180,11 +186,13 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
 function Detail({
   config,
   item,
+  existingNames,
   onDone,
   onDeleted,
 }: {
   config: ManagementListConfig
   item: RefItem | null
+  existingNames: string[]
   onDone: () => void
   onDeleted: () => void
 }) {
@@ -219,7 +227,13 @@ function Detail({
 
   const dirty =
     !item || config.fields.some((f) => (form[f.key] ?? '') !== (item[f.key] ?? (f.type === 'checkbox' ? false : '')))
-  const valid = String(form.name ?? '').trim().length > 0
+  const trimmedName = String(form.name ?? '').trim()
+  // On create, flag a name that's already in the list (case-insensitive) so
+  // the user sees it before the API rejects it as a duplicate.
+  const duplicate =
+    !item && trimmedName !== '' && existingNames.some((n) => n.toLowerCase() === trimmedName.toLowerCase())
+  const singular = config.addLabel.replace(/^Add /i, '').toLowerCase()
+  const valid = trimmedName.length > 0 && !duplicate
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -241,6 +255,7 @@ function Detail({
           />
         ))}
 
+        {duplicate && <p className={styles.warn}>A {singular} called “{trimmedName}” already exists.</p>}
         {error && <p className={styles.error}>{error}</p>}
 
         <button type="submit" className="btn btn--primary" disabled={!dirty || !valid || save.isPending}>

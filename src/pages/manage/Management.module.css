@@ -137,6 +137,22 @@
   padding: 16px 20px;
   color: var(--ink-muted);
 }
+.retry {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--amber);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.warn {
+  color: var(--amber);
+  font-size: 13.5px;
+  margin: 0;
+}
 
 .panel {
   position: sticky;

@@ -5,6 +5,7 @@ import { ApiError } from '../../api/client'
 import { orchardsApi, type Orchard, type OrchardInput } from '../../api/management'
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
+import { ListState } from './ListState'
 import styles from './Management.module.css'
 
 const BLANK: OrchardInput = { name: '', location: '', grower: '', notes: '' }
@@ -98,9 +99,13 @@ export function OrchardsPage() {
               </span>
             </button>
           ))}
-          {visible.length === 0 && (
-            <p className={styles.empty}>{orchards.length === 0 ? 'No orchards yet.' : 'No matches.'}</p>
-          )}
+          <ListState
+            isPending={list.isPending}
+            isError={list.isError}
+            isEmpty={visible.length === 0}
+            emptyLabel={orchards.length === 0 ? 'No orchards yet.' : 'No matches.'}
+            onRetry={() => list.refetch()}
+          />
         </div>
 
         {(creating || selected) && (

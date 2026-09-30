@@ -5,6 +5,7 @@ import { ApiError } from '../../api/client'
 import { usersApi, type User, type UserCreateInput } from '../../api/management'
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
+import { ListState } from './ListState'
 import styles from './Management.module.css'
 
 const ROLES: { value: string; label: string; blurb: string }[] = [
@@ -105,9 +106,13 @@ export function UsersPage() {
               </span>
             </button>
           ))}
-          {visible.length === 0 && (
-            <p className={styles.empty}>{users.length === 0 ? 'No users.' : 'No matches.'}</p>
-          )}
+          <ListState
+            isPending={list.isPending}
+            isError={list.isError}
+            isEmpty={visible.length === 0}
+            emptyLabel={users.length === 0 ? 'No users.' : 'No matches.'}
+            onRetry={() => list.refetch()}
+          />
         </div>
 
         {(creating || selected) && (
