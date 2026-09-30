@@ -67,6 +67,22 @@ export interface ForwardTraceNode {
   is_ready_for_sale: boolean
 }
 
+export interface LotEvent {
+  id: string
+  occurred_at: string
+  recorded_at: string
+  recorded_by_email: string | null
+  is_backdated: boolean
+  event_type: string
+  description: string
+  change: string | null
+  balance_l: string | null
+  is_correction: boolean
+  corrects_event_id: string | null
+  is_corrected: boolean
+  is_abv_override: boolean
+}
+
 export const lotsApi = {
   list: () => api.get<Lot[]>('/lots'),
   get: (lotId: string) => api.get<Lot>(`/lots/${lotId}`),
@@ -74,4 +90,5 @@ export const lotsApi = {
   dutyLine: (lotId: string) => api.get<DutyLine | null>(`/lots/${lotId}/duty`),
   backwardTrace: (lotId: string) => api.get<BackwardTrace>(`/lots/${lotId}/trace/backward`),
   forwardTrace: (lotId: string) => api.get<ForwardTraceNode[]>(`/lots/${lotId}/trace/forward`),
+  events: (lotId: string) => api.get<LotEvent[]>(`/lots/${lotId}/events`),
 }

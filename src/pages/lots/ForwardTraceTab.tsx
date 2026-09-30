@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
+import { IconDownload } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
+import { downloadFile } from '../../api/client'
 import { lotsApi, type ForwardTraceNode } from '../../api/lots'
 import styles from './LotPage.module.css'
 
@@ -25,6 +27,17 @@ export function ForwardTraceTab({ lotId }: { lotId: string }) {
 
   return (
     <div className={styles.tabBody}>
+      <div className={styles.traceActions}>
+        <button
+          className="btn"
+          onClick={() =>
+            void downloadFile(`/lots/${lotId}/trace/forward/csv`, `trace-forward-${lotId}.csv`)
+          }
+        >
+          <IconDownload size={16} stroke={1.8} /> Export CSV
+        </button>
+      </div>
+
       <div className={styles.recallCards}>
         <RecallCard label="Ready for sale" value={ready} tone="green" />
         <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="amber" />

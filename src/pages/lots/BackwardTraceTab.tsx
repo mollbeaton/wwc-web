@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
+import { IconDownload } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
+import { downloadFile } from '../../api/client'
 import { lotsApi } from '../../api/lots'
 import { fixed, shortDate } from '../../lib/format'
 import styles from './LotPage.module.css'
@@ -15,6 +17,17 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
 
   return (
     <div className={styles.tabBody}>
+      <div className={styles.traceActions}>
+        <button
+          className="btn"
+          onClick={() =>
+            void downloadFile(`/lots/${lotId}/trace/backward/csv`, `trace-back-${lotId}.csv`)
+          }
+        >
+          <IconDownload size={16} stroke={1.8} /> Export CSV
+        </button>
+      </div>
+
       <div className="card">
         <h3 className={styles.sectionTitle}>Where the fruit came from</h3>
         {trace.composition.length === 0 ? (
