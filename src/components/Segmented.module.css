@@ -1,0 +1,38 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+}
+.segments {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-segment);
+  padding: 2px;
+  gap: 2px;
+}
+.segment {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+.segment:hover {
+  color: var(--ink-2);
+}
+.active,
+.active:hover {
+  background: var(--chip);
+  color: var(--ink);
+}

@@ -6,6 +6,7 @@ import { AppShell } from './layout/AppShell'
 import { DutyPage } from './pages/duty/DutyPage'
 import { DutySettings } from './pages/duty/DutySettings'
 import { Placeholder } from './pages/Placeholder'
+import { TanksPage } from './pages/tanks/TanksPage'
 
 const MANAGE_LISTS: { path: string; title: string; subtitle: string }[] = [
   { path: 'users', title: 'Users', subtitle: 'Who can sign in, and what they can do' },
@@ -32,9 +33,10 @@ export function App() {
           }
         >
           <Route index element={<Navigate to="/tanks" replace />} />
+          <Route path="/tanks" element={<TanksPage />} />
           <Route
-            path="/tanks"
-            element={<Placeholder title="Tanks" subtitle="What's in every vessel right now" spec="WD-08 to WD-10" />}
+            path="/lots/:lotId"
+            element={<Placeholder title="Lot" subtitle="Traceability, reconciliation and duty" spec="WD-12 to WD-14" />}
           />
           <Route
             path="/trace"
