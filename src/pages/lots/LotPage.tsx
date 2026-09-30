@@ -7,6 +7,7 @@ import { lotsApi, type Lot } from '../../api/lots'
 import { vesselsApi } from '../../api/vessels'
 import { Tabs, type TabDef } from '../../components/Tabs'
 import { fixed } from '../../lib/format'
+import { lotStatusPill } from '../../lib/lotStatus'
 import { BackwardTraceTab } from './BackwardTraceTab'
 import { ForwardTraceTab } from './ForwardTraceTab'
 import { HistoryTab } from './HistoryTab'
@@ -19,15 +20,6 @@ const TABS: TabDef<LotTab>[] = [
   { value: 'backward', label: 'Backward trace' },
   { value: 'forward', label: 'Forward trace' },
 ]
-
-function statusPill(lot: Lot): { label: string; cls: string } {
-  if (lot.status === 'ended') return { label: 'Ended', cls: 'pill--grey' }
-  if (lot.status === 'archived') return { label: 'Archived', cls: 'pill--grey' }
-  const released = lot.status === 'dispatched' || Number(lot.ready_for_sale_volume_l) > 0
-  if (released) return { label: 'Ready for sale', cls: 'pill--green' }
-  if (lot.kind !== 'tank') return { label: 'Packaged', cls: 'pill--dashed' }
-  return { label: 'In vessel', cls: 'pill--blue' }
-}
 
 export function LotPage() {
   const { lotId = '' } = useParams()
@@ -46,7 +38,7 @@ export function LotPage() {
   }
 
   const lot = lotQuery.data
-  const pill = statusPill(lot)
+  const pill = lotStatusPill(lot)
   const vesselByID = new Map((vessels.data ?? []).map((v) => [v.id, v]))
   const vesselCodes = lot.current_vessel_ids
     .map((id) => vesselByID.get(id)?.code ?? '—')

@@ -1,0 +1,15 @@
+.varietyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.varietyRow:last-child {
+  border-bottom: none;
+}
+.varietyName {
+  font-weight: 600;
+  text-transform: capitalize;
+}

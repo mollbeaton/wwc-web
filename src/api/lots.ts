@@ -68,6 +68,7 @@ export interface ForwardTraceNode {
 }
 
 export const lotsApi = {
+  list: () => api.get<Lot[]>('/lots'),
   get: (lotId: string) => api.get<Lot>(`/lots/${lotId}`),
   reconciliation: (lotId: string) => api.get<Reconciliation>(`/lots/${lotId}/reconciliation`),
   dutyLine: (lotId: string) => api.get<DutyLine | null>(`/lots/${lotId}/duty`),

@@ -5,9 +5,11 @@ import { LoginPage } from './auth/LoginPage'
 import { AppShell } from './layout/AppShell'
 import { DutyPage } from './pages/duty/DutyPage'
 import { DutySettings } from './pages/duty/DutySettings'
+import { HarvestPage } from './pages/harvests/HarvestPage'
 import { LotPage } from './pages/lots/LotPage'
 import { Placeholder } from './pages/Placeholder'
 import { TanksPage } from './pages/tanks/TanksPage'
+import { TraceIndex } from './pages/trace/TraceIndex'
 
 const MANAGE_LISTS: { path: string; title: string; subtitle: string }[] = [
   { path: 'users', title: 'Users', subtitle: 'Who can sign in, and what they can do' },
@@ -36,10 +38,8 @@ export function App() {
           <Route index element={<Navigate to="/tanks" replace />} />
           <Route path="/tanks" element={<TanksPage />} />
           <Route path="/lots/:lotId" element={<LotPage />} />
-          <Route
-            path="/trace"
-            element={<Placeholder title="Trace" subtitle="What went into this, and where it went" spec="WD-11 to WD-16" />}
-          />
+          <Route path="/trace" element={<TraceIndex />} />
+          <Route path="/harvests/:harvestId" element={<HarvestPage />} />
           <Route
             path="/duty"
             element={
