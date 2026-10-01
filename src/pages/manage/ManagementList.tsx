@@ -6,6 +6,7 @@ import type { RefBody, RefItem, ReferenceListApi } from '../../api/referenceList
 import { ChangeLog } from '../../components/ChangeLog'
 import { PageHeader } from '../../components/PageHeader'
 import { Segmented } from '../../components/Segmented'
+import { ImportDialog } from './ImportDialog'
 import { ListState } from './ListState'
 import styles from './Management.module.css'
 
@@ -43,6 +44,9 @@ export interface ManagementListConfig {
   /** Extra per-list validation beyond "primary field is non-empty"
    * (e.g. a vessel needs a positive capacity). */
   isValid?: (form: RefBody) => boolean
+  /** Field keys, in order, accepted by the paste/CSV importer. Omit to hide
+   * the Import button (e.g. lists with checkbox fields that don't paste well). */
+  importColumns?: string[]
 }
 
 function blankFrom(fields: FieldConfig[]): RefBody {
@@ -65,6 +69,7 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
   const [creating, setCreating] = useState(false)
   const [query, setQuery] = useState('')
   const [filterValue, setFilterValue] = useState('all')
+  const [showImport, setShowImport] = useState(false)
 
   // Always fetch the full list and filter by status client-side: keeps the
   // retired count correct whatever the toggle, and works for lists whose API
@@ -101,17 +106,33 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
         title={config.title}
         subtitle={config.subtitle}
         actions={
-          <button
-            className="btn btn--primary"
-            onClick={() => {
-              setCreating(true)
-              setSelectedId(null)
-            }}
-          >
-            <IconPlus size={16} stroke={2} /> {config.addLabel}
-          </button>
+          <>
+            {config.importColumns && (
+              <button className="btn" onClick={() => setShowImport(true)}>
+                Import
+              </button>
+            )}
+            <button
+              className="btn btn--primary"
+              onClick={() => {
+                setCreating(true)
+                setSelectedId(null)
+              }}
+            >
+              <IconPlus size={16} stroke={2} /> {config.addLabel}
+            </button>
+          </>
         }
       />
+
+      {showImport && (
+        <ImportDialog
+          config={config}
+          existingPrimaries={items.map((i) => String(i[primaryField] ?? ''))}
+          onClose={() => setShowImport(false)}
+          onImported={invalidate}
+        />
+      )}
 
       <div className={styles.toolbar}>
         <div className={styles.search}>

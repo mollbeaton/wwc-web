@@ -15,6 +15,7 @@ const ORCHARDS: ManagementListConfig = {
   api: makeReferenceListApi('/orchards'),
   gridTemplate: 'minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 60px 90px',
   searchKeys: ['name', 'location', 'grower'],
+  importColumns: ['name', 'location', 'grower'],
   columns: [
     { key: 'name', label: 'Name' },
     { key: 'location', label: 'Location' },
