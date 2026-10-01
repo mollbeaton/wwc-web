@@ -35,6 +35,14 @@ export interface ManagementListConfig {
   /** Key of a select field to offer as a category filter (e.g. 'fruit').
    * Its options drive the filter; omit for search-only pages. */
   filterField?: string
+  /** The required identifying field — drives validity, the duplicate check and
+   * the detail title. Defaults to 'name'; vessels use 'code'. */
+  primaryField?: string
+  /** Item fields the search box matches against. Defaults to [primaryField]. */
+  searchKeys?: string[]
+  /** Extra per-list validation beyond "primary field is non-empty"
+   * (e.g. a vessel needs a positive capacity). */
+  isValid?: (form: RefBody) => boolean
 }
 
 function blankFrom(fields: FieldConfig[]): RefBody {
@@ -58,11 +66,17 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
   const [query, setQuery] = useState('')
   const [filterValue, setFilterValue] = useState('all')
 
+  // Always fetch the full list and filter by status client-side: keeps the
+  // retired count correct whatever the toggle, and works for lists whose API
+  // (e.g. vessels) doesn't take an include_retired param.
   const list = useQuery({
-    queryKey: [config.queryKey, showRetired],
-    queryFn: () => config.api.list(showRetired),
+    queryKey: [config.queryKey],
+    queryFn: () => config.api.list(true),
   })
   const invalidate = () => queryClient.invalidateQueries({ queryKey: [config.queryKey] })
+
+  const primaryField = config.primaryField ?? 'name'
+  const searchKeys = config.searchKeys ?? [primaryField]
 
   const items = list.data ?? []
   const retiredCount = items.filter((i) => i.status === 'retired').length
@@ -73,11 +87,12 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
     ? config.fields.find((f) => f.key === config.filterField)
     : undefined
   const q = query.trim().toLowerCase()
-  const visible = items.filter((item) => {
+  const byStatus = showRetired ? items : items.filter((i) => i.status === 'active')
+  const visible = byStatus.filter((item) => {
     if (filterConfig && filterValue !== 'all' && String(item[filterConfig.key] ?? '') !== filterValue) {
       return false
     }
-    return q === '' || String(item.name ?? '').toLowerCase().includes(q)
+    return q === '' || searchKeys.some((k) => String(item[k] ?? '').toLowerCase().includes(q))
   })
 
   return (
@@ -166,7 +181,8 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
             key={selected?.id ?? 'new'}
             config={config}
             item={creating ? null : selected}
-            existingNames={items.map((i) => String(i.name ?? ''))}
+            primaryField={primaryField}
+            existingNames={items.map((i) => String(i[primaryField] ?? ''))}
             onDone={() => {
               setCreating(false)
               invalidate()
@@ -186,12 +202,14 @@ export function ManagementList({ config }: { config: ManagementListConfig }) {
 function Detail({
   config,
   item,
+  primaryField,
   existingNames,
   onDone,
   onDeleted,
 }: {
   config: ManagementListConfig
   item: RefItem | null
+  primaryField: string
   existingNames: string[]
   onDone: () => void
   onDeleted: () => void
@@ -227,13 +245,13 @@ function Detail({
 
   const dirty =
     !item || config.fields.some((f) => (form[f.key] ?? '') !== (item[f.key] ?? (f.type === 'checkbox' ? false : '')))
-  const trimmedName = String(form.name ?? '').trim()
-  // On create, flag a name that's already in the list (case-insensitive) so
-  // the user sees it before the API rejects it as a duplicate.
+  const trimmedName = String(form[primaryField] ?? '').trim()
+  // On create, flag a primary value that's already in the list (case-insensitive)
+  // so the user sees it before the API rejects it as a duplicate.
   const duplicate =
     !item && trimmedName !== '' && existingNames.some((n) => n.toLowerCase() === trimmedName.toLowerCase())
   const singular = config.addLabel.replace(/^Add /i, '').toLowerCase()
-  const valid = trimmedName.length > 0 && !duplicate
+  const valid = trimmedName.length > 0 && !duplicate && (config.isValid?.(form) ?? true)
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -243,7 +261,7 @@ function Detail({
 
   return (
     <div className={`card ${styles.panel}`}>
-      <h3 className={styles.panelTitle}>{item ? String(item.name) : `New ${config.addLabel.replace(/^Add /i, '').toLowerCase()}`}</h3>
+      <h3 className={styles.panelTitle}>{item ? String(item[primaryField]) : `New ${singular}`}</h3>
 
       <form onSubmit={onSubmit} className={styles.form}>
         {config.fields.map((f) => (
