@@ -39,26 +39,30 @@ export function Sidebar() {
         </>
       )}
 
-      <div className={styles.footer}>
-        {/* Demo-only role preview (WD-31): lets the real admin see what a Cellar
-            or Viewer sees. Never a production feature. */}
-        <label className={styles.previewLabel}>Preview role</label>
-        <select
-          className={styles.previewSelect}
-          value={previewRole ?? user?.role ?? 'admin'}
-          onChange={(e) => {
-            const next = e.target.value as Role
-            setPreviewRole(next === user?.role ? null : next)
-          }}
-        >
-          {(['admin', 'cellar', 'viewer'] as Role[]).map((r) => (
-            <option key={r} value={r}>
-              {ROLE_LABELS[r]}
-              {r === user?.role ? ' (you)' : ''}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Role preview (WD-31): lets an admin see what a Cellar or Viewer sees.
+          Admin-only - since it drives effectiveRole (which route guards read),
+          exposing it to lower roles would let them unlock the UI for themselves
+          (the API still enforces, but the chrome shouldn't invite it). */}
+      {user?.role === 'admin' && (
+        <div className={styles.footer}>
+          <label className={styles.previewLabel}>Preview role</label>
+          <select
+            className={styles.previewSelect}
+            value={previewRole ?? user.role}
+            onChange={(e) => {
+              const next = e.target.value as Role
+              setPreviewRole(next === user.role ? null : next)
+            }}
+          >
+            {(['admin', 'cellar', 'viewer'] as Role[]).map((r) => (
+              <option key={r} value={r}>
+                {ROLE_LABELS[r]}
+                {r === user.role ? ' (you)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </nav>
   )
 }
