@@ -29,7 +29,7 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
       </div>
 
       <div className="card">
-        <h3 className={styles.sectionTitle}>Where the fruit came from</h3>
+        <h2 className={styles.sectionTitle}>Where the fruit came from</h2>
         {trace.composition.length === 0 ? (
           <p className={styles.muted}>
             No fruit composition recorded — the trace ends at a supplier.
@@ -54,7 +54,7 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
 
       {trace.intake_suppliers.length > 0 && (
         <div className="card">
-          <h3 className={styles.sectionTitle}>Bought-in juice</h3>
+          <h2 className={styles.sectionTitle}>Bought-in juice</h2>
           {trace.intake_suppliers.map((s, i) => (
             <div key={i} className={styles.supplier}>
               {s}
@@ -65,7 +65,7 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
 
       {trace.additions.length > 0 && (
         <div className="card">
-          <h3 className={styles.sectionTitle}>Additions</h3>
+          <h2 className={styles.sectionTitle}>Additions</h2>
           {trace.additions.map((a, i) => (
             <div key={i} className={styles.compRow}>
               <div className={styles.compMain}>
@@ -82,7 +82,7 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
 
       {trace.ancestor_lot_ids.length > 0 && (
         <div className="card">
-          <h3 className={styles.sectionTitle}>Parent lots</h3>
+          <h2 className={styles.sectionTitle}>Parent lots</h2>
           <div className={styles.ancestors}>
             {trace.ancestor_lot_ids.map((id) => (
               <Link key={id} to={`/lots/${id}`} className={styles.ancestorLink}>

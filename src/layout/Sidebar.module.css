@@ -7,14 +7,75 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  min-height: 100vh;
+  /* Pinned while the page scrolls, so Manage's long list stays reachable. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .brand {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
   padding: 6px 12px 14px;
 }
+.brand > div {
+  display: flex;
+  flex-direction: column;
+}
+.close {
+  display: none;
+}
+.scrim {
+  display: none;
+}
+
+/* Drawer below 900px ---------------------------------------------------- */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    z-index: 90;
+    width: min(280px, 85vw);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
+  .open {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.2s ease;
+    box-shadow: var(--modal-shadow);
+  }
+  .scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: var(--modal-backdrop);
+  }
+  .close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin: -4px -6px 0 0;
+    border-radius: 9px;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--ink-2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .open {
+    transition: none;
+  }
+}
+
 .brandName {
   font-family: var(--font-title);
   font-weight: 700;

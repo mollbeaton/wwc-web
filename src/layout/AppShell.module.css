@@ -1,6 +1,5 @@
 .shell {
   display: flex;
-  flex-wrap: wrap;
   min-height: 100vh;
 }
 
@@ -14,4 +13,10 @@
 .content {
   flex: 1;
   padding: 26px var(--content-pad-x) 56px;
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding-top: 20px;
+  }
 }

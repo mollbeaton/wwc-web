@@ -1,0 +1,19 @@
+.body {
+  color: var(--ink-2);
+  font-size: 14.5px;
+}
+.body p {
+  margin: 0 0 8px;
+}
+.body p:last-child {
+  margin-bottom: 0;
+}
+
+.error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--r-input);
+  background: var(--coral-soft);
+  color: var(--coral);
+  font-size: 13.5px;
+}

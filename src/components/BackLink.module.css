@@ -1,0 +1,15 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.back:hover {
+  color: var(--ink-2);
+}

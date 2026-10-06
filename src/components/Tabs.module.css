@@ -23,3 +23,14 @@
   color: var(--ink);
   border-bottom-color: var(--amber);
 }
+
+@media (max-width: 600px) {
+  .tabs {
+    gap: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tab {
+    white-space: nowrap;
+  }
+}

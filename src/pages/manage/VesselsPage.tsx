@@ -1,11 +1,7 @@
 import { makeReferenceListApi, type RefBody } from '../../api/referenceLists'
 import { VESSEL_TYPES } from '../../api/vessels'
-import { fixed } from '../../lib/format'
+import { fixed, vesselTypeLabel } from '../../lib/format'
 import { ManagementList, type ManagementListConfig } from './ManagementList'
-
-function cap(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
 
 const VESSELS: ManagementListConfig = {
   title: 'Vessels',
@@ -24,7 +20,7 @@ const VESSELS: ManagementListConfig = {
       label: 'Vessel',
       render: (v) => (v.name ? `${String(v.code)} · ${String(v.name)}` : String(v.code)),
     },
-    { key: 'type', label: 'Type', render: (v) => cap(String(v.type)) },
+    { key: 'type', label: 'Type', render: (v) => vesselTypeLabel(String(v.type)) },
     { key: 'capacity_l', label: 'Capacity', render: (v) => `${fixed(String(v.capacity_l), 0)} L` },
     { key: 'used_count', label: 'Used', render: (v) => String(v.used_count) },
   ],
@@ -36,7 +32,7 @@ const VESSELS: ManagementListConfig = {
       key: 'type',
       label: 'Type',
       type: 'select',
-      options: VESSEL_TYPES.map((t) => ({ value: t, label: cap(t) })),
+      options: VESSEL_TYPES.map((t) => ({ value: t, label: vesselTypeLabel(t) })),
     },
   ],
 }

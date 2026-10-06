@@ -21,9 +21,9 @@ function auth(user: CurrentUser | null): ReturnType<typeof useAuth> {
   }
 }
 
-function render() {
+function render(path = '/') {
   return renderWithClient(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[path]}>
       <Sidebar />
     </MemoryRouter>,
   )
@@ -48,5 +48,28 @@ describe('Sidebar role preview', () => {
     mockedUseAuth.mockReturnValue(auth({ id: '3', email: 'v@b.co', role: 'viewer' }))
     render()
     expect(screen.queryByText('Preview role')).not.toBeInTheDocument()
+  })
+})
+
+describe('Sidebar active section', () => {
+  beforeEach(() => mockedUseAuth.mockReturnValue(auth({ id: '1', email: 'a@b.co', role: 'admin' })))
+
+  const isActive = (name: string) => screen.getByRole('link', { name }).className.includes('active')
+
+  it('keeps Trace highlighted on a lot page', () => {
+    render('/lots/abc')
+    expect(isActive('Trace')).toBe(true)
+    expect(isActive('Tanks')).toBe(false)
+  })
+
+  it('keeps Trace highlighted on a harvest page', () => {
+    render('/harvests/h1')
+    expect(isActive('Trace')).toBe(true)
+  })
+
+  it('highlights only the matching item elsewhere', () => {
+    render('/tanks')
+    expect(isActive('Tanks')).toBe(true)
+    expect(isActive('Trace')).toBe(false)
   })
 })

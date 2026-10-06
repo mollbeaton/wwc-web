@@ -3,6 +3,7 @@ import { IconAlertTriangle } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { lotsApi, type LotEvent } from '../../api/lots'
+import { Modal, ModalActions } from '../../components/Modal'
 import styles from './CorrectionModal.module.css'
 
 type Mode = 'value' | 'time'
@@ -66,71 +67,80 @@ export function CorrectionModal({
   }
 
   return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <form className={styles.modal} onClick={(e) => e.stopPropagation()} onSubmit={onSubmit}>
-        <h3 className={styles.title}>Correct this {isLoss ? 'loss' : 'addition'}</h3>
-        <p className={styles.sub}>{event.description} · {event.change}</p>
+    <Modal
+      title={`Correct this ${isLoss ? 'loss' : 'addition'}`}
+      onClose={onClose}
+      dismissable={!save.isPending}
+      as="form"
+      onSubmit={onSubmit}
+    >
+      <p className={styles.sub}>{event.description} · {event.change}</p>
 
-        <div className={styles.modes}>
-          <button
-            type="button"
-            className={`${styles.modeBtn} ${mode === 'value' ? styles.modeActive : ''}`}
-            onClick={() => setMode('value')}
-          >
-            Amount
-          </button>
-          <button
-            type="button"
-            className={`${styles.modeBtn} ${mode === 'time' ? styles.modeActive : ''}`}
-            onClick={() => setMode('time')}
-          >
-            Time it happened
-          </button>
-        </div>
+      <div className={styles.modes} role="group" aria-label="What to correct">
+        <button
+          type="button"
+          aria-pressed={mode === 'value'}
+          className={`${styles.modeBtn} ${mode === 'value' ? styles.modeActive : ''}`}
+          onClick={() => setMode('value')}
+        >
+          Amount
+        </button>
+        <button
+          type="button"
+          aria-pressed={mode === 'time'}
+          className={`${styles.modeBtn} ${mode === 'time' ? styles.modeActive : ''}`}
+          onClick={() => setMode('time')}
+        >
+          Time it happened
+        </button>
+      </div>
 
-        {mode === 'value' ? (
-          <label className={styles.field}>
-            <span>New {isLoss ? 'volume (L)' : `amount (${unit})`}</span>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              autoFocus
-            />
-          </label>
-        ) : (
-          <label className={styles.field}>
-            <span>When it happened</span>
-            <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
-          </label>
-        )}
-
+      {mode === 'value' ? (
         <label className={styles.field}>
-          <span>Reason (required)</span>
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
+          <span>New {isLoss ? 'volume (L)' : `amount (${unit})`}</span>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            autoFocus
+          />
         </label>
+      ) : (
+        <label className={styles.field}>
+          <span>When it happened</span>
+          <input type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} />
+        </label>
+      )}
 
-        {hasDutyLine && (
-          <div className={styles.dutyWarning}>
-            <IconAlertTriangle size={16} stroke={1.9} />
-            This lot has a duty line. A correction that changes its volume or ABV produces an
-            adjustment on the next open return.
-          </div>
-        )}
+      <label className={styles.field}>
+        <span>Reason (required)</span>
+        <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} />
+      </label>
 
-        {error && <p className={styles.error}>{error}</p>}
-
-        <div className={styles.actions}>
-          <button type="button" className="btn" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="submit" className="btn btn--primary" disabled={!valid || save.isPending}>
-            {save.isPending ? 'Saving…' : 'Save correction'}
-          </button>
+      {hasDutyLine && (
+        <div className={styles.dutyWarning}>
+          <IconAlertTriangle size={16} stroke={1.9} />
+          This lot has a duty line. A correction that changes its volume or ABV produces an
+          adjustment on the next open return.
         </div>
-      </form>
-    </div>
+      )}
+
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+
+      <ModalActions>
+        <button type="button" className="btn" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="submit" className="btn btn--primary" disabled={!valid || save.isPending}>
+          {save.isPending ? 'Saving…' : 'Save correction'}
+        </button>
+      </ModalActions>
+    </Modal>
   )
 }

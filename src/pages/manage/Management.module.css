@@ -46,7 +46,7 @@
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: 16px;
   align-items: start;
 }
@@ -58,7 +58,7 @@
 
 .roleCards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 12px;
   margin-bottom: 20px;
 }
@@ -137,19 +137,8 @@
   padding: 16px 20px;
   color: var(--ink-muted);
 }
-.retry {
-  border: none;
-  background: none;
-  padding: 0;
-  color: var(--amber);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
 .warn {
-  color: var(--amber);
+  color: var(--coral);
   font-size: 13.5px;
   margin: 0;
 }

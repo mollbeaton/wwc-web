@@ -52,7 +52,7 @@ export function ProductionAccount() {
       )}
 
       {query.data && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card card--flush">
           <div className={`${styles.row} ${styles.head}`}>
             <span>Month</span>
             <span className={styles.num}>hl of pure alcohol</span>

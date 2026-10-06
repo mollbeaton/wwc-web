@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import { usersApi, type User, type UserCreateInput } from '../../api/management'
 import { ChangeLog } from '../../components/ChangeLog'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { PageHeader } from '../../components/PageHeader'
 import { ListState } from './ListState'
 import styles from './Management.module.css'
@@ -137,6 +138,7 @@ function UserDetail({ user, onDone }: { user: User | null; onDone: () => void })
       : { email: '', name: '', role: 'cellar', password: '' },
   )
   const [error, setError] = useState<string | null>(null)
+  const [confirmingDeactivate, setConfirmingDeactivate] = useState(false)
 
   const changeLog = useQuery({
     queryKey: ['users', user?.id, 'change-log'],
@@ -152,8 +154,14 @@ function UserDetail({ user, onDone }: { user: User | null; onDone: () => void })
   })
   const status = useMutation({
     mutationFn: () => (user!.status === 'active' ? usersApi.deactivate(user!.id) : usersApi.reactivate(user!.id)),
-    onSuccess: onDone,
-    onError: (e) => setError(e instanceof ApiError ? e.message : 'Could not change status'),
+    onSuccess: () => {
+      setConfirmingDeactivate(false)
+      onDone()
+    },
+    onError: (e) => {
+      // While the confirm dialog is up it shows the error itself.
+      if (!confirmingDeactivate) setError(e instanceof ApiError ? e.message : 'Could not change status')
+    },
   })
 
   const dirty = !user || form.name !== (user.name ?? '') || form.role !== user.role
@@ -217,7 +225,20 @@ function UserDetail({ user, onDone }: { user: User | null; onDone: () => void })
       {user && (
         <>
           <div className={styles.actions}>
-            <button className="btn" onClick={() => status.mutate()} disabled={status.isPending}>
+            <button
+              className="btn"
+              onClick={() => {
+                // Deactivating signs someone out of the iOS app mid-shift, so
+                // confirm it; reactivating is harmless and stays one click.
+                if (user.status === 'active') {
+                  status.reset()
+                  setConfirmingDeactivate(true)
+                } else {
+                  status.mutate()
+                }
+              }}
+              disabled={status.isPending}
+            >
               {user.status === 'active' ? 'Deactivate' : 'Reactivate'}
             </button>
           </div>
@@ -226,6 +247,30 @@ function UserDetail({ user, onDone }: { user: User | null; onDone: () => void })
             <ChangeLog entries={changeLog.data ?? []} />
           </div>
         </>
+      )}
+
+      {confirmingDeactivate && user && (
+        <ConfirmDialog
+          title={`Deactivate ${user.name ?? user.email}?`}
+          confirmLabel="Deactivate"
+          pendingLabel="Deactivating…"
+          tone="danger"
+          pending={status.isPending}
+          error={
+            status.error
+              ? status.error instanceof ApiError
+                ? status.error.message
+                : 'Could not deactivate'
+              : null
+          }
+          onConfirm={() => status.mutate()}
+          onCancel={() => setConfirmingDeactivate(false)}
+        >
+          <p>
+            They’ll be signed out and won’t be able to sign in to the dashboard or the cellar app.
+            Their past entries stay. You can reactivate them at any time.
+          </p>
+        </ConfirmDialog>
       )}
     </div>
   )

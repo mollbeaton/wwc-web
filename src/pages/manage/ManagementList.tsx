@@ -4,6 +4,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { ApiError } from '../../api/client'
 import type { RefBody, RefItem, ReferenceListApi } from '../../api/referenceLists'
 import { ChangeLog } from '../../components/ChangeLog'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { PageHeader } from '../../components/PageHeader'
 import { Segmented } from '../../components/Segmented'
 import { ImportDialog } from './ImportDialog'
@@ -242,6 +243,7 @@ function Detail({
     return body
   })
   const [error, setError] = useState<string | null>(null)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
 
   const changeLog = useQuery({
     queryKey: [config.queryKey, item?.id, 'change-log'],
@@ -257,11 +259,12 @@ function Detail({
   const retire = useMutation({
     mutationFn: () => (item!.status === 'active' ? config.api.retire(item!.id) : config.api.restore(item!.id)),
     onSuccess: onDone,
+    onError: (e) =>
+      setError(e instanceof ApiError ? e.message : `Could not ${item?.status === 'active' ? 'retire' : 'restore'}`),
   })
   const remove = useMutation({
     mutationFn: () => config.api.remove(item!.id),
     onSuccess: onDeleted,
-    onError: (e) => setError(e instanceof ApiError ? e.message : 'Could not delete'),
   })
 
   const dirty =
@@ -310,7 +313,10 @@ function Detail({
             </button>
             <button
               className={styles.deleteBtn}
-              onClick={() => remove.mutate()}
+              onClick={() => {
+                remove.reset()
+                setConfirmingDelete(true)
+              }}
               disabled={item.used_count > 0 || remove.isPending}
               title={item.used_count > 0 ? 'In use — retire it instead' : 'Delete'}
             >
@@ -322,6 +328,24 @@ function Detail({
             <ChangeLog entries={changeLog.data ?? []} />
           </div>
         </>
+      )}
+
+      {confirmingDelete && item && (
+        <ConfirmDialog
+          title={`Delete “${String(item[primaryField])}”?`}
+          confirmLabel="Delete"
+          pendingLabel="Deleting…"
+          tone="danger"
+          pending={remove.isPending}
+          error={remove.error ? (remove.error instanceof ApiError ? remove.error.message : 'Could not delete') : null}
+          onConfirm={() => remove.mutate()}
+          onCancel={() => setConfirmingDelete(false)}
+        >
+          <p>
+            This removes it for good. It’s never been used, so no records point at it — but if you
+            might want it back, retire it instead.
+          </p>
+        </ConfirmDialog>
       )}
     </div>
   )

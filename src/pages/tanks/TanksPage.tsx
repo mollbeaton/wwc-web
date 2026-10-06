@@ -4,15 +4,20 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { tanksApi, type VesselCard } from '../../api/tanks'
 import { ApiError } from '../../api/client'
+import { AbvTag } from '../../components/AbvTag'
 import { PageHeader } from '../../components/PageHeader'
 import { Segmented } from '../../components/Segmented'
-import { fixed } from '../../lib/format'
+import { cap, fixed, vesselTypeLabel } from '../../lib/format'
 import styles from './TanksPage.module.css'
 
 const STALE_DAYS = 14
 
 type ShowFilter = 'all' | 'occupied' | 'empty'
-type ActivityFilter = 'any' | '7' | '14'
+
+function isStale(v: VesselCard): boolean {
+  const days = v.lot?.days_since_last_event
+  return days != null && days >= STALE_DAYS
+}
 
 export function TanksPage() {
   const query = useQuery({ queryKey: ['tanks', 'overview'], queryFn: tanksApi.overview })
@@ -20,20 +25,18 @@ export function TanksPage() {
   const [type, setType] = useState('all')
   const [product, setProduct] = useState('all')
   const [show, setShow] = useState<ShowFilter>('all')
-  const [activity, setActivity] = useState<ActivityFilter>('any')
+  const [attentionOnly, setAttentionOnly] = useState(false)
 
   const vessels = query.data?.vessels ?? []
   const types = ['all', ...Array.from(new Set(vessels.map((v) => v.type)))]
+  const staleCount = vessels.filter(isStale).length
 
   const filtered = vessels.filter((v) => {
     if (type !== 'all' && v.type !== type) return false
     if (show === 'occupied' && !v.lot) return false
     if (show === 'empty' && v.lot) return false
     if (product !== 'all' && v.lot?.product_type !== product) return false
-    if (activity !== 'any') {
-      const days = v.lot?.days_since_last_event
-      if (days == null || days < Number(activity)) return false
-    }
+    if (attentionOnly && !isStale(v)) return false
     return true
   })
 
@@ -43,7 +46,7 @@ export function TanksPage() {
     <div>
       <PageHeader title="Tanks" subtitle="What's in every vessel right now" />
 
-      {query.isLoading && <p className={styles.muted}>Loading…</p>}
+      {query.isLoading && <TanksSkeleton />}
       {query.error && (
         <p className={styles.error}>
           {query.error instanceof ApiError ? query.error.message : 'Could not load the tanks'}
@@ -66,7 +69,7 @@ export function TanksPage() {
         <div className={styles.filters}>
           <Segmented
             label="Type"
-            options={types.map((t) => ({ value: t, label: t === 'all' ? 'All' : cap(t) }))}
+            options={types.map((t) => ({ value: t, label: t === 'all' ? 'All' : vesselTypeLabel(t) }))}
             value={type}
             onChange={setType}
           />
@@ -90,22 +93,46 @@ export function TanksPage() {
             value={show}
             onChange={(v) => setShow(v as ShowFilter)}
           />
-          <Segmented
-            label="No activity"
-            options={[
-              { value: 'any', label: 'Any' },
-              { value: '7', label: '7+ days' },
-              { value: '14', label: '14+ days' },
-            ]}
-            value={activity}
-            onChange={(v) => setActivity(v as ActivityFilter)}
-          />
+          {staleCount > 0 && (
+            <button
+              type="button"
+              aria-pressed={attentionOnly}
+              className={`${styles.attention} ${attentionOnly ? styles.attentionOn : ''}`}
+              onClick={() => setAttentionOnly((on) => !on)}
+              title={`Lots with no activity for ${STALE_DAYS}+ days`}
+            >
+              <IconClockExclamation size={16} stroke={1.9} />
+              {staleCount} need{staleCount === 1 ? 's' : ''} attention
+            </button>
+          )}
         </div>
       )}
 
       <div className={styles.grid}>
         {filtered.map((v) => (
           <VesselCardView key={v.vessel_id} vessel={v} />
+        ))}
+      </div>
+      {query.data && filtered.length === 0 && (
+        <p className="muted">No vessels match these filters.</p>
+      )}
+    </div>
+  )
+}
+
+/** Placeholder cards in the shape of the real page while it loads, so the
+ *  summary and grid don't pop in and shove each other around. */
+function TanksSkeleton() {
+  return (
+    <div aria-busy="true" aria-label="Loading tanks">
+      <div className={styles.summary}>
+        {Array.from({ length: 4 }, (_, i) => (
+          <div key={i} className={`skeleton ${styles.statSkeleton}`} />
+        ))}
+      </div>
+      <div className={styles.grid}>
+        {Array.from({ length: 8 }, (_, i) => (
+          <div key={i} className={`skeleton ${styles.cardSkeleton}`} />
         ))}
       </div>
     </div>
@@ -127,7 +154,7 @@ function VesselCardView({ vessel }: { vessel: VesselCard }) {
       <div className={`${styles.card} ${styles.empty}`}>
         <div className={styles.cardTop}>
           <span className={styles.vesselName}>{vessel.name ?? vessel.code}</span>
-          <span className="pill pill--grey">{cap(vessel.type)}</span>
+          <span className="pill pill--grey">{vesselTypeLabel(vessel.type)}</span>
         </div>
         <div className={styles.emptyState}>
           Empty · {fixed(vessel.capacity_l, 0)} L capacity
@@ -137,15 +164,15 @@ function VesselCardView({ vessel }: { vessel: VesselCard }) {
   }
 
   const lot = vessel.lot
-  const stale = lot.days_since_last_event != null && lot.days_since_last_event >= STALE_DAYS
+  const stale = isStale(vessel)
   const dotClass =
     lot.product_type === 'wine' ? styles.dotWine : lot.product_type === 'cider' ? styles.dotCider : ''
 
   return (
-    <Link to={`/lots/${lot.lot_id}`} className={styles.card}>
+    <Link to={`/lots/${lot.lot_id}`} className={`${styles.card} ${stale ? styles.cardStale : ''}`}>
       <div className={styles.cardTop}>
         <span className={styles.vesselName}>{vessel.name ?? vessel.code}</span>
-        <span className="pill pill--grey">{cap(vessel.type)}</span>
+        <span className="pill pill--grey">{vesselTypeLabel(vessel.type)}</span>
       </div>
 
       <div className={`mono ${styles.lotCode}`}>{lot.code}</div>
@@ -177,9 +204,7 @@ function VesselCardView({ vessel }: { vessel: VesselCard }) {
           ABV{' '}
           <span className="mono">{lot.abv ? `${lot.abv}%` : '—'}</span>{' '}
           {lot.abv_method && (
-            <span className={lot.abv_method === 'manual' ? styles.manual : styles.calc}>
-              {lot.abv_method === 'manual' ? 'manual' : 'calc'}
-            </span>
+            <AbvTag method={lot.abv_method} />
           )}
         </span>
       </div>
@@ -194,8 +219,4 @@ function VesselCardView({ vessel }: { vessel: VesselCard }) {
       )}
     </Link>
   )
-}
-
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
 }

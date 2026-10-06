@@ -138,3 +138,99 @@ a {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* A card whose content runs edge to edge (tables, accordions). */
+.card--flush {
+  padding: 0;
+}
+
+/* Cards stacked down the page. */
+.card-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+/* A quiet inline action - for routine actions that shouldn't shout. */
+.text-link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 3px;
+}
+.text-link:hover {
+  color: var(--ink);
+  text-decoration-color: var(--ink-muted);
+}
+
+/* Loading placeholder that holds the shape of the content it stands in for,
+   so the page doesn't jump when data lands. */
+.skeleton {
+  border-radius: var(--r-card);
+  background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+  background-size: 200% 100%;
+  border: 1px solid var(--border);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+/* Small inline tag for a reading's provenance (manual vs calculated ABV). */
+.tag {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  vertical-align: 1px;
+}
+.tag--manual {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.tag--calc {
+  background: var(--chip);
+  color: var(--ink-muted);
+}
+
+.btn--danger {
+  background: var(--coral);
+  border-color: var(--coral);
+  color: var(--on-amber);
+  font-weight: 700;
+}
+.btn--danger:hover {
+  filter: brightness(1.05);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

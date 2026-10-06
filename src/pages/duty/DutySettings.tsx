@@ -37,7 +37,7 @@ function FullRates() {
   return (
     <div>
       {query.data && (
-        <div className="card" style={{ padding: 0 }}>
+        <div className="card card--flush">
           <div className={`${styles.rateRow} ${styles.head}`}>
             <span>Category</span>
             <span>Effective from</span>
@@ -69,7 +69,7 @@ function SprTables() {
         published SPR tables before relying on the relief figures.
       </div>
       {query.data?.map((table) => (
-        <div className="card" key={table.spr_table} style={{ marginBottom: 12 }}>
+        <div className={`card ${styles.stacked}`} key={table.spr_table}>
           <div className={styles.tableName}>{table.spr_table_label}</div>
           <div className={styles.tableApplies}>{table.applies_to}</div>
           <div className={styles.bandTable}>
@@ -139,7 +139,7 @@ function OpeningRow({ row, onSaved }: { row: OpeningProduction; onSaved: () => v
   }
 
   return (
-    <form className="card" onSubmit={onSubmit} style={{ marginBottom: 12 }}>
+    <form className={`card ${styles.stacked}`} onSubmit={onSubmit}>
       <div className={styles.openingRow}>
         <div>
           <div className={styles.openingYear}>

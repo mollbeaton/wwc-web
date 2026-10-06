@@ -1,4 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { IconX } from '@tabler/icons-react'
+import { useEffect, useId } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import type { Role } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { MAIN_NAV, MANAGE_NAV, visibleFor, type NavItem } from './nav'
@@ -10,16 +12,35 @@ const ROLE_LABELS: Record<Role, string> = {
   viewer: 'Viewer',
 }
 
-export function Sidebar() {
+/** The app's nav. A fixed column on wide screens; below 900px it's a drawer
+ *  that `open` slides in over the page (opened from the top bar's menu). */
+export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void }) {
   const { user, effectiveRole, previewRole, setPreviewRole } = useAuth()
   const mainItems = visibleFor(MAIN_NAV, effectiveRole)
   const manageItems = visibleFor(MANAGE_NAV, effectiveRole)
+  const previewId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose?.()
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
 
   return (
-    <nav className={styles.sidebar}>
+    <>
+    {open && <div className={styles.scrim} onClick={onClose} aria-hidden="true" />}
+    <nav className={`${styles.sidebar} ${open ? styles.open : ''}`} aria-label="Main">
       <div className={styles.brand}>
-        <span className={styles.brandName}>Wild West Cider</span>
-        <span className={styles.brandSub}>Cellar office</span>
+        <div>
+          <span className={styles.brandName}>Wild West Cider</span>
+          <span className={styles.brandSub}>Cellar office</span>
+        </div>
+        {onClose && (
+          <button type="button" className={styles.close} onClick={onClose} aria-label="Close menu">
+            <IconX size={18} stroke={1.9} />
+          </button>
+        )}
       </div>
 
       <div className={styles.group}>
@@ -45,8 +66,11 @@ export function Sidebar() {
           (the API still enforces, but the chrome shouldn't invite it). */}
       {user?.role === 'admin' && (
         <div className={styles.footer}>
-          <label className={styles.previewLabel}>Preview role</label>
+          <label className={styles.previewLabel} htmlFor={previewId}>
+            Preview role
+          </label>
           <select
+            id={previewId}
             className={styles.previewSelect}
             value={previewRole ?? user.role}
             onChange={(e) => {
@@ -64,15 +88,18 @@ export function Sidebar() {
         </div>
       )}
     </nav>
+    </>
   )
 }
 
 function NavItemLink({ item }: { item: NavItem }) {
   const Icon = item.icon
+  const { pathname } = useLocation()
+  const inSection = item.alsoActiveFor?.some((prefix) => pathname.startsWith(prefix)) ?? false
   return (
     <NavLink
       to={item.to}
-      className={({ isActive }) => `${styles.item} ${isActive ? styles.active : ''}`}
+      className={({ isActive }) => `${styles.item} ${isActive || inSection ? styles.active : ''}`}
     >
       <Icon size={19} stroke={1.75} />
       <span>{item.label}</span>

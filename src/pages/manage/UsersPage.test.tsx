@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { UsersPage } from './UsersPage'
 import { usersApi } from '../../api/management'
 import type { User } from '../../api/management'
@@ -67,10 +67,23 @@ describe('UsersPage', () => {
     )
   })
 
-  it('deactivates an existing user', async () => {
+  it('deactivates an existing user only after confirming', async () => {
     const { user } = renderWithClient(<UsersPage />)
     await user.click(await screen.findByText('Sam'))
     await user.click(screen.getByRole('button', { name: 'Deactivate' }))
+    expect(api.deactivate).not.toHaveBeenCalled()
+
+    const dialog = screen.getByRole('dialog', { name: 'Deactivate Sam?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Deactivate' }))
     await waitFor(() => expect(api.deactivate).toHaveBeenCalledWith('1'))
+  })
+
+  it('leaves the user active when the confirmation is cancelled', async () => {
+    const { user } = renderWithClient(<UsersPage />)
+    await user.click(await screen.findByText('Sam'))
+    await user.click(screen.getByRole('button', { name: 'Deactivate' }))
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(api.deactivate).not.toHaveBeenCalled()
   })
 })

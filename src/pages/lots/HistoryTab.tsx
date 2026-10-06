@@ -36,7 +36,7 @@ export function HistoryTab({ lotId }: { lotId: string }) {
   return (
     <div className={styles.tabBody}>
       <div className="card">
-        <h3 className={styles.sectionTitle}>Volume reconciliation</h3>
+        <h2 className={styles.sectionTitle}>Volume reconciliation</h2>
         {recon.data && (
           <div className={styles.recon}>
             <ReconRow label="Started with" value={`${fixed(recon.data.starting_volume_l, 1)} L`} />
@@ -75,7 +75,7 @@ export function HistoryTab({ lotId }: { lotId: string }) {
       </div>
 
       <div className="card">
-        <h3 className={styles.sectionTitle}>Duty</h3>
+        <h2 className={styles.sectionTitle}>Duty</h2>
         {duty.data ? (
           <div className={styles.dutyGrid}>
             <DutyFact label="Category" value={duty.data.category_label} />
@@ -102,18 +102,18 @@ export function HistoryTab({ lotId }: { lotId: string }) {
         )}
       </div>
 
-      <div className="card" style={{ padding: 0 }}>
-        <h3 className={styles.sectionTitle} style={{ padding: '20px 22px 0' }}>
+      <div className="card card--flush">
+        <h2 className={`${styles.sectionTitle} ${styles.flushTitle}`} id={`history-${lotId}`}>
           History
-        </h3>
-        <div className={styles.eventScroll}>
-          <div className={`${styles.eventRow} ${styles.eventHead}`}>
-            <span>Happened</span>
-            <span>Entered</span>
-            <span>By</span>
-            <span>Event</span>
-            <span className={styles.num}>Change</span>
-            <span className={styles.num}>Balance</span>
+        </h2>
+        <div className={styles.eventScroll} role="table" aria-labelledby={`history-${lotId}`}>
+          <div className={`${styles.eventRow} ${styles.eventHead}`} role="row">
+            <span role="columnheader">Happened</span>
+            <span role="columnheader">Entered</span>
+            <span role="columnheader">By</span>
+            <span role="columnheader">Event</span>
+            <span role="columnheader" className={styles.num}>Change</span>
+            <span role="columnheader" className={styles.num}>Balance</span>
           </div>
           {events.data?.map((e) => (
             <EventRow
@@ -123,9 +123,7 @@ export function HistoryTab({ lotId }: { lotId: string }) {
             />
           ))}
           {events.data && events.data.length === 0 && (
-            <p className={styles.muted} style={{ padding: '12px 22px' }}>
-              No events yet.
-            </p>
+            <p className={`${styles.muted} ${styles.flushNote}`}>No events yet.</p>
           )}
         </div>
       </div>
@@ -153,22 +151,30 @@ function EventRow({ event, onCorrect }: { event: LotEvent; onCorrect?: () => voi
     .join(' ')
 
   return (
-    <div className={cls}>
-      <span>{dateTime(event.occurred_at)}</span>
-      <span className={event.is_backdated ? styles.late : styles.muted}>
+    <div className={cls} role="row">
+      <span role="cell">{dateTime(event.occurred_at)}</span>
+      <span
+        role="cell"
+        className={event.is_backdated ? styles.late : styles.muted}
+        title={event.is_backdated ? 'Entered after the fact' : undefined}
+      >
         {dateTime(event.recorded_at)}
       </span>
-      <span className={styles.by}>{event.recorded_by_email ?? '—'}</span>
-      <span>
+      <span role="cell" className={styles.by}>
+        {event.recorded_by_email ?? '—'}
+      </span>
+      <span role="cell">
         {event.description}
         {onCorrect && (
-          <button className={styles.correctLink} onClick={onCorrect}>
+          <button type="button" className={`text-link ${styles.correctLink}`} onClick={onCorrect}>
             Correct
           </button>
         )}
       </span>
-      <span className={`mono ${styles.num}`}>{event.change ?? '—'}</span>
-      <span className={`mono ${styles.num}`}>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {event.change ?? '—'}
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
         {event.balance_l != null ? `${fixed(event.balance_l, 1)} L` : '—'}
       </span>
     </div>
@@ -196,7 +202,7 @@ function DutyFact({
   strong?: boolean
 }) {
   return (
-    <div className={styles.dutyFact}>
+    <div>
       <div className={styles.factLabel}>{label}</div>
       <div className={`${mono ? 'mono ' : ''}${strong ? styles.dutyStrong : styles.factValue}`}>
         {value}

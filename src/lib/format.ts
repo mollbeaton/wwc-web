@@ -16,10 +16,11 @@ const MONTHS = [
   'December',
 ]
 
-/** "£10.39" from the API's "10.39". */
+/** "£10.39" from the API's "10.39"; a credit like "-14.20" reads "−£14.20"
+ *  (sign before the symbol, with a true minus to match the volume figures). */
 export function gbp(value: string): string {
   const n = Number(value)
-  return `£${n.toFixed(2)}`
+  return n < 0 ? `−£${Math.abs(n).toFixed(2)}` : `£${n.toFixed(2)}`
 }
 
 /** A decimal string to a fixed number of places, for LPA and hl figures. */
@@ -44,4 +45,15 @@ export function shortDate(iso: string): string {
     month: 'short',
     year: 'numeric',
   })
+}
+
+/** "Cider" from "cider" - for enum values shown as labels. */
+export function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+/** "Tank", "Barrel", "IBC" - vessel types are enum values, and IBC is an
+ *  acronym that plain capitalising would turn into "Ibc". */
+export function vesselTypeLabel(type: string): string {
+  return type === 'ibc' ? 'IBC' : cap(type)
 }

@@ -1,11 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
+import { useState, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { harvestsApi, orchardsApi } from '../../api/harvests'
 import { lotsApi } from '../../api/lots'
 import { PageHeader } from '../../components/PageHeader'
-import { shortDate } from '../../lib/format'
+import { cap, shortDate } from '../../lib/format'
 import { lotStatusPill } from '../../lib/lotStatus'
 import styles from './TraceIndex.module.css'
+
+/** Rows shown per column before "Show all" - enough to find something recent
+ *  without the page becoming every lot the cidery has ever made. */
+const PREVIEW_ROWS = 12
 
 export function TraceIndex() {
   const [params] = useSearchParams()
@@ -40,11 +45,15 @@ export function TraceIndex() {
         subtitle={q ? `Results for “${params.get('q')}”` : 'What went into a lot, and where it went'}
       />
 
-      <div className={styles.columns}>
-        <div className="card">
-          <h3 className={styles.sectionTitle}>Lots</h3>
-          {matchedLots.length === 0 && <p className={styles.muted}>No lots.</p>}
-          {matchedLots.map((lot) => {
+      {/* Keyed on the search so "Show all" resets when the query changes. */}
+      <div className={styles.columns} key={q}>
+        <TraceColumn
+          title="Lots"
+          noun="lots"
+          isPending={lots.isPending}
+          isError={lots.isError}
+          onRetry={() => lots.refetch()}
+          rows={matchedLots.map((lot) => {
             const pill = lotStatusPill(lot)
             return (
               <Link key={lot.id} to={`/lots/${lot.id}`} className={styles.row}>
@@ -54,12 +63,15 @@ export function TraceIndex() {
               </Link>
             )
           })}
-        </div>
+        />
 
-        <div className="card">
-          <h3 className={styles.sectionTitle}>Harvests</h3>
-          {matchedHarvests.length === 0 && <p className={styles.muted}>No harvests.</p>}
-          {matchedHarvests.map((h) => (
+        <TraceColumn
+          title="Harvests"
+          noun="harvests"
+          isPending={harvests.isPending}
+          isError={harvests.isError}
+          onRetry={() => harvests.refetch()}
+          rows={matchedHarvests.map((h) => (
             <Link key={h.id} to={`/harvests/${h.id}`} className={styles.row}>
               <span className="mono">{h.code}</span>
               <span className={styles.rowMain}>
@@ -68,12 +80,56 @@ export function TraceIndex() {
               <span className="pill pill--grey">{cap(h.fruit)}</span>
             </Link>
           ))}
-        </div>
+        />
       </div>
     </div>
   )
 }
 
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
+function TraceColumn({
+  title,
+  noun,
+  rows,
+  isPending,
+  isError,
+  onRetry,
+}: {
+  title: string
+  noun: string
+  rows: ReactNode[]
+  isPending: boolean
+  isError: boolean
+  onRetry: () => void
+}) {
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? rows : rows.slice(0, PREVIEW_ROWS)
+
+  return (
+    <div className="card">
+      <div className={styles.columnHead}>
+        <h2 className={styles.sectionTitle}>{title}</h2>
+        {!isPending && !isError && <span className={styles.count}>{rows.length}</span>}
+      </div>
+
+      {isPending &&
+        Array.from({ length: 5 }, (_, i) => <div key={i} className={`skeleton ${styles.rowSkeleton}`} />)}
+      {isError && (
+        <p className="muted">
+          Couldn’t load {noun}.{' '}
+          <button type="button" className="text-link" onClick={onRetry}>
+            Retry
+          </button>
+        </p>
+      )}
+      {!isPending && !isError && rows.length === 0 && <p className="muted">No {noun}.</p>}
+
+      {visible}
+
+      {rows.length > PREVIEW_ROWS && (
+        <button type="button" className={`text-link ${styles.more}`} onClick={() => setShowAll((s) => !s)}>
+          {showAll ? 'Show fewer' : `Show all ${rows.length} ${noun}`}
+        </button>
+      )}
+    </div>
+  )
 }

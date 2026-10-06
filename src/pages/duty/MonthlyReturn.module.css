@@ -32,6 +32,7 @@
 
 .statusLine {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
@@ -78,7 +79,12 @@
 
 .sectionTitle {
   font-size: 17px;
-  margin: 22px 0 12px;
+  margin: 22px 0 4px;
+}
+.sectionNote {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--ink-muted);
 }
 
 .groupHead {
@@ -110,6 +116,9 @@
   font-size: 13px;
   color: var(--ink-muted);
 }
+.lpaInline {
+  display: none;
+}
 .groupLpa {
   text-align: right;
   color: var(--ink-2);
@@ -127,11 +136,11 @@
 }
 .detailRow {
   display: grid;
-  grid-template-columns: 90px 110px 70px 96px 66px 66px 66px 76px 84px;
+  grid-template-columns: 90px 110px 70px 120px 66px 66px 66px 76px 84px;
   gap: 10px;
   padding: 8px 0;
   font-size: 13.5px;
-  min-width: 720px;
+  min-width: 750px;
 }
 .detailHead {
   font-family: var(--font-title);
@@ -145,9 +154,6 @@
 .num {
   text-align: right;
 }
-.manual {
-  color: var(--blue);
-}
 
 .adjustments {
   margin-top: 8px;
@@ -157,8 +163,8 @@
   grid-template-columns: 110px minmax(0, 1fr) 120px 100px;
   gap: 12px;
   padding: 10px 20px;
-  background: var(--coral-soft);
-  border: 1px solid var(--coral);
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 10px;
   margin-bottom: 8px;
   font-size: 14px;
@@ -187,4 +193,30 @@
 }
 .totalRow span:nth-child(3) {
   text-align: right;
+}
+
+/* On a phone the LPA total moves under the category so the label keeps room. */
+@media (max-width: 600px) {
+  .groupHead {
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    padding: 14px 16px;
+  }
+  .groupLpa {
+    display: none;
+  }
+  .lpaInline {
+    display: inline;
+  }
+  .totalRow {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding: 16px;
+  }
+  .adjustmentRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 10px 14px;
+  }
+  .adjustmentRow span:nth-child(2),
+  .adjustmentRow span:nth-child(3) {
+    display: none;
+  }
 }

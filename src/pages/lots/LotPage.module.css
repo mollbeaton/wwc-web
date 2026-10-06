@@ -5,19 +5,6 @@
   color: var(--coral);
 }
 
-.breadcrumb {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--ink-muted);
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 16px;
-}
-.breadcrumb:hover {
-  color: var(--ink-2);
-}
-
 .header {
   display: flex;
   align-items: flex-start;
@@ -32,7 +19,7 @@
   flex-wrap: wrap;
 }
 .code {
-  font-size: 34px;
+  font-size: clamp(26px, 5vw, 34px);
   font-weight: 700;
 }
 .name {
@@ -51,7 +38,7 @@
 
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr));
   gap: 14px;
   margin-bottom: 22px;
 }
@@ -70,6 +57,14 @@
   font-size: 20px;
   font-weight: 700;
   margin-top: 6px;
+}
+.headerSkeleton {
+  height: 44px;
+  max-width: 360px;
+  margin-bottom: 22px;
+}
+.factSkeleton {
+  height: 84px;
 }
 .factSub {
   font-size: 12.5px;
@@ -129,7 +124,6 @@
   border-top: 1px solid var(--border);
   font-weight: 700;
   font-size: 16px;
-  color: var(--amber);
 }
 .balances {
   display: flex;
@@ -153,13 +147,10 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
-.dutyFact {
-}
 .dutyStrong {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  margin-top: 6px;
-  color: var(--amber);
+  margin-top: 4px;
 }
 
 .traceActions {
@@ -205,22 +196,26 @@
   color: var(--ink-muted);
 }
 .eventCorrection {
-  background: var(--coral-soft);
+  background: var(--surface-2);
+  box-shadow: inset 3px 0 0 var(--ink-muted);
 }
 .eventOverride {
   background: var(--blue-soft);
 }
 .correctLink {
   margin-left: 10px;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--coral);
-  font-weight: 600;
   font-size: 12.5px;
 }
-.correctLink:hover {
-  text-decoration: underline;
+
+.num {
+  text-align: right;
+}
+.flushTitle {
+  padding: 20px 22px 0;
+}
+.flushNote {
+  margin: 0;
+  padding: 12px 22px;
 }
 
 /* Backward trace ------------------------------------------------------- */
@@ -289,8 +284,8 @@
 .recall_green {
   background: var(--green-soft);
 }
-.recall_amber {
-  background: var(--amber-soft);
+.recall_grey {
+  background: var(--surface-2);
 }
 .recall_blue {
   background: var(--blue-soft);

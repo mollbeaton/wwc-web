@@ -1,12 +1,32 @@
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 16px;
   align-items: start;
 }
+.columnHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 .sectionTitle {
   font-size: 17px;
-  margin: 0 0 12px;
+  margin: 0;
+}
+.count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.rowSkeleton {
+  height: 30px;
+  margin: 9px 0;
+  border-radius: 8px;
+}
+.more {
+  margin-top: 12px;
+  font-size: 14px;
 }
 .muted {
   color: var(--ink-muted);
@@ -19,8 +39,11 @@
   border-bottom: 1px solid var(--border);
   color: inherit;
 }
-.row:last-child {
+.row:last-of-type {
   border-bottom: none;
+}
+.row:hover .rowMain {
+  color: var(--ink);
 }
 .rowMain {
   flex: 1;

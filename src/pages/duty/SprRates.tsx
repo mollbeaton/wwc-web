@@ -68,7 +68,7 @@ export function SprRates() {
           </p>
 
           {query.data.tables.map((table) => (
-            <div className="card" key={table.spr_table} style={{ marginBottom: 12 }}>
+            <div className={`card ${styles.stacked}`} key={table.spr_table}>
               <div className={styles.tableHead}>
                 <div>
                   <div className={styles.tableName}>{table.spr_table_label}</div>

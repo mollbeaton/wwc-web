@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { ManagementList, type ManagementListConfig } from './ManagementList'
 import { makeFakeReferenceApi } from '../../test/fakeReferenceApi'
 import { renderWithClient } from '../../test/utils'
@@ -128,6 +128,32 @@ describe('ManagementList', () => {
     renderWithClient(<ManagementList config={config(api)} />)
     expect(await screen.findByText(/Couldn.t load/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument()
+  })
+
+  it('deletes an unused item only after confirming', async () => {
+    const api = makeFakeReferenceApi(seed)
+    const { user } = renderWithClient(<ManagementList config={config(api)} />)
+    await user.click(await screen.findByText('Dabinett'))
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(api.remove).not.toHaveBeenCalled()
+
+    // Esc backs out without deleting.
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(api.remove).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    const dialog = screen.getByRole('dialog', { name: 'Delete “Dabinett”?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
+    await waitFor(() => expect(api.remove).toHaveBeenCalledWith('1'))
+    await waitFor(() => expect(screen.queryByText('Dabinett')).not.toBeInTheDocument())
+  })
+
+  it('keeps delete disabled for an item that is in use', async () => {
+    const api = makeFakeReferenceApi([{ id: '1', name: 'Dabinett', fruit: 'apple', used_count: 3 }])
+    const { user } = renderWithClient(<ManagementList config={config(api)} />)
+    await user.click(await screen.findByText('Dabinett'))
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled()
   })
 
   it('hides retired items until "Show retired" is toggled', async () => {

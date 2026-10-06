@@ -1,9 +1,11 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { IconAlertTriangle, IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { dutyApi, type DutyLine, type MonthlyReturn as MonthlyReturnData } from '../../api/duty'
 import { ApiError, downloadFile } from '../../api/client'
 import { useAuth } from '../../auth/AuthContext'
+import { AbvTag } from '../../components/AbvTag'
+import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { gbp, fixed, monthLabel, shortDate } from '../../lib/format'
 import styles from './MonthlyReturn.module.css'
 
@@ -40,10 +42,16 @@ export function MonthlyReturn() {
 
   const filedSet = new Set((filedQuery.data ?? []).map((f) => `${f.period_year}-${f.period_month}`))
 
-  async function markFiled() {
-    await dutyApi.markFiled(selected.year, selected.month)
-    await queryClient.invalidateQueries({ queryKey: ['duty'] })
-  }
+  // Filing is the step that tells the books "this went to HMRC", so it's
+  // confirmed first and a failure is shown rather than swallowed.
+  const [confirmingFile, setConfirmingFile] = useState(false)
+  const file = useMutation({
+    mutationFn: () => dutyApi.markFiled(selected.year, selected.month),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['duty'] })
+      setConfirmingFile(false)
+    },
+  })
 
   function exportCsv() {
     const { year, month } = selected
@@ -62,6 +70,8 @@ export function MonthlyReturn() {
           return (
             <button
               key={`${m.year}-${m.month}`}
+              type="button"
+              aria-pressed={isSelected}
               className={`${styles.chip} ${isSelected ? styles.chipActive : ''}`}
               onClick={() => setSelected(m)}
             >
@@ -86,9 +96,37 @@ export function MonthlyReturn() {
         <ReturnBody
           data={returnQuery.data}
           canFile={effectiveRole === 'admin'}
-          onFile={markFiled}
+          onFile={() => {
+            file.reset()
+            setConfirmingFile(true)
+          }}
           onExport={exportCsv}
         />
+      )}
+
+      {confirmingFile && returnQuery.data && (
+        <ConfirmDialog
+          title={`Mark ${monthLabel(selected.year, selected.month)} as filed?`}
+          confirmLabel="Mark as filed"
+          pendingLabel="Filing…"
+          pending={file.isPending}
+          error={
+            file.error
+              ? file.error instanceof ApiError
+                ? file.error.message
+                : 'Could not mark the return as filed. Please try again.'
+              : null
+          }
+          onConfirm={() => file.mutate()}
+          onCancel={() => setConfirmingFile(false)}
+        >
+          <p>
+            Only do this once the return has been submitted to HMRC. Totals:{' '}
+            <strong className="mono">{fixed(returnQuery.data.total_lpa, 2)} LPA</strong>,{' '}
+            <strong className="mono">{gbp(returnQuery.data.total_duty)}</strong> duty.
+          </p>
+          <p>Any later correction to these lots will show as an adjustment on the next open month.</p>
+        </ConfirmDialog>
       )}
     </div>
   )
@@ -116,7 +154,7 @@ function ReturnBody({
               Filed{data.filed_at ? ` · ${shortDate(data.filed_at)}` : ''}
             </span>
           ) : (
-            <span className="pill pill--amber">Open</span>
+            <span className="pill pill--grey">Open</span>
           )}
         </div>
         <div className={styles.statusActions}>
@@ -149,13 +187,18 @@ function ReturnBody({
 
       {!hasLines && <div className="card muted">No duty lines in this month yet.</div>}
 
-      {data.groups.map((group) => (
-        <ReturnGroup key={group.category} group={group} />
-      ))}
+      <div className="card-stack">
+        {data.groups.map((group) => (
+          <ReturnGroup key={group.category} group={group} />
+        ))}
+      </div>
 
       {data.adjustments.length > 0 && (
         <div className={styles.adjustments}>
           <h3 className={styles.sectionTitle}>Adjustments to filed months</h3>
+          <p className={styles.sectionNote}>
+            Corrections to lots that were on an already-filed return. They’re paid on this one.
+          </p>
           {data.adjustments.map((line) => (
             <div key={line.id} className={styles.adjustmentRow}>
               <span className="mono">{line.lot_code}</span>
@@ -182,31 +225,37 @@ function ReturnGroup({ group }: { group: { category: string } & ReturnGroupData 
   const [open, setOpen] = useState(false)
   const Chevron = open ? IconChevronDown : IconChevronRight
   return (
-    <div className="card" style={{ marginBottom: 12, padding: 0 }}>
-      <button className={styles.groupHead} onClick={() => setOpen((o) => !o)}>
+    <div className="card card--flush">
+      <button
+        type="button"
+        className={styles.groupHead}
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+      >
         <Chevron size={18} stroke={1.9} className={styles.chevron} />
         <div className={styles.groupTitle}>
           <span className={styles.groupLabel}>{group.category_label}</span>
           <span className={styles.groupRelief}>
             {group.relief_table_label ?? 'No relief'} · {group.lines.length}{' '}
             {group.lines.length === 1 ? 'line' : 'lines'}
+            <span className={`mono ${styles.lpaInline}`}> · {fixed(group.total_lpa, 2)} LPA</span>
           </span>
         </div>
         <span className={`mono ${styles.groupLpa}`}>{fixed(group.total_lpa, 2)} LPA</span>
         <span className={`mono ${styles.groupDuty}`}>{gbp(group.total_duty)}</span>
       </button>
       {open && (
-        <div className={styles.detailWrap}>
-          <div className={`${styles.detailRow} ${styles.detailHead}`}>
-            <span>Date</span>
-            <span>Lot</span>
-            <span className={styles.num}>Litres</span>
-            <span className={styles.num}>ABV</span>
-            <span className={styles.num}>LPA</span>
-            <span className={styles.num}>Full</span>
-            <span className={styles.num}>SPR</span>
-            <span className={styles.num}>Charged</span>
-            <span className={styles.num}>Duty</span>
+        <div className={styles.detailWrap} role="table" aria-label={`${group.category_label} lines`}>
+          <div className={`${styles.detailRow} ${styles.detailHead}`} role="row">
+            <span role="columnheader">Date</span>
+            <span role="columnheader">Lot</span>
+            <span role="columnheader" className={styles.num}>Litres</span>
+            <span role="columnheader" className={styles.num}>ABV</span>
+            <span role="columnheader" className={styles.num}>LPA</span>
+            <span role="columnheader" className={styles.num}>Full</span>
+            <span role="columnheader" className={styles.num}>SPR</span>
+            <span role="columnheader" className={styles.num}>Charged</span>
+            <span role="columnheader" className={styles.num}>Duty</span>
           </div>
           {group.lines.map((line) => (
             <DetailRow key={line.id} line={line} />
@@ -227,20 +276,32 @@ interface ReturnGroupData {
 
 function DetailRow({ line }: { line: DutyLine }) {
   return (
-    <div className={styles.detailRow}>
-      <span>{shortDate(line.duty_point_date)}</span>
-      <span className="mono">{line.lot_code}</span>
-      <span className={`mono ${styles.num}`}>{fixed(line.volume_l, 1)}</span>
-      <span className={`mono ${styles.num} ${line.abv_method === 'manual' ? styles.manual : ''}`}>
-        {line.abv}% {line.abv_method === 'manual' ? 'man.' : 'calc'}
+    <div className={styles.detailRow} role="row">
+      <span role="cell">{shortDate(line.duty_point_date)}</span>
+      <span role="cell" className="mono">
+        {line.lot_code}
       </span>
-      <span className={`mono ${styles.num}`}>{fixed(line.lpa, 2)}</span>
-      <span className={`mono ${styles.num}`}>{fixed(line.full_rate, 2)}</span>
-      <span className={`mono ${styles.num}`}>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {fixed(line.volume_l, 1)}
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {line.abv}% <AbvTag method={line.abv_method} />
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {fixed(line.lpa, 2)}
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {fixed(line.full_rate, 2)}
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
         {line.spr_discount_per_lpa === '0.00' ? '—' : fixed(line.spr_discount_per_lpa, 2)}
       </span>
-      <span className={`mono ${styles.num}`}>{fixed(line.rate_charged, 2)}</span>
-      <span className={`mono ${styles.num}`}>{gbp(line.duty_owed)}</span>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {fixed(line.rate_charged, 2)}
+      </span>
+      <span role="cell" className={`mono ${styles.num}`}>
+        {gbp(line.duty_owed)}
+      </span>
     </div>
   )
 }

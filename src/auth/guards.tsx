@@ -24,7 +24,7 @@ export function RequireRole({ roles, children }: { roles: Role[]; children: Reac
 function FullPageSpinner() {
   return (
     <div style={{ display: 'grid', placeItems: 'center', minHeight: '100vh' }}>
-      <span style={{ color: 'var(--ink-muted)' }}>Loading…</span>
+      <span className="muted">Loading…</span>
     </div>
   )
 }

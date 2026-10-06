@@ -106,3 +106,8 @@
 .hmrcLink:hover {
   text-decoration: underline;
 }
+
+/* Cards repeated down the page. */
+.stacked {
+  margin-bottom: 12px;
+}

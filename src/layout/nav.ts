@@ -20,6 +20,9 @@ export interface NavItem {
   icon: Icon
   /** Roles allowed to see this item. */
   roles: Role[]
+  /** Other path prefixes that belong to this section, so it stays highlighted
+   *  on pages that aren't its own route (e.g. a lot page is part of Trace). */
+  alsoActiveFor?: string[]
 }
 
 const ALL: Role[] = ['admin', 'cellar', 'viewer']
@@ -28,7 +31,9 @@ const ALL: Role[] = ['admin', 'cellar', 'viewer']
 // adds Duty (read-only); Admin sees everything including Manage.
 export const MAIN_NAV: NavItem[] = [
   { to: '/tanks', label: 'Tanks', icon: IconBuildingWarehouse, roles: ALL },
-  { to: '/trace', label: 'Trace', icon: IconDroplet, roles: ALL },
+  // Lot and harvest pages are trace views (history, backward and forward
+  // trace), whichever list you opened them from.
+  { to: '/trace', label: 'Trace', icon: IconDroplet, roles: ALL, alsoActiveFor: ['/lots/', '/harvests/'] },
   { to: '/duty', label: 'Duty', icon: IconCurrencyPound, roles: ['admin', 'viewer'] },
   { to: '/duty-settings', label: 'Duty settings', icon: IconAdjustments, roles: ['admin'] },
 ]

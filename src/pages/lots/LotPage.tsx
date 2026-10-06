@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { IconAlertTriangle, IconArrowLeft } from '@tabler/icons-react'
+import { IconAlertTriangle } from '@tabler/icons-react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { lotsApi, type Lot } from '../../api/lots'
 import { vesselsApi } from '../../api/vessels'
+import { BackLink } from '../../components/BackLink'
 import { Tabs, type TabDef } from '../../components/Tabs'
-import { fixed } from '../../lib/format'
+import { cap, fixed, gbp, shortDate } from '../../lib/format'
 import { lotStatusPill } from '../../lib/lotStatus'
 import { BackwardTraceTab } from './BackwardTraceTab'
 import { ForwardTraceTab } from './ForwardTraceTab'
@@ -27,13 +28,32 @@ export function LotPage() {
 
   const vessels = useQuery({ queryKey: ['vessels'], queryFn: vesselsApi.list })
   const lotQuery = useQuery({ queryKey: ['lot', lotId], queryFn: () => lotsApi.get(lotId) })
+  // Same key as the History tab's duty card, so this is one request, shared.
+  const duty = useQuery({ queryKey: ['lot', lotId, 'duty'], queryFn: () => lotsApi.dutyLine(lotId) })
 
-  if (lotQuery.isLoading) return <p className={styles.muted}>Loading…</p>
+  const back = <BackLink fallbackTo="/tanks" fallbackLabel="Tanks" />
+
+  if (lotQuery.isLoading) {
+    return (
+      <div aria-busy="true" aria-label="Loading lot">
+        {back}
+        <div className={`skeleton ${styles.headerSkeleton}`} />
+        <div className={styles.facts}>
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className={`skeleton ${styles.factSkeleton}`} />
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (lotQuery.error || !lotQuery.data) {
     return (
-      <p className={styles.error}>
-        {lotQuery.error instanceof ApiError ? lotQuery.error.message : 'Could not load the lot'}
-      </p>
+      <div>
+        {back}
+        <p className={styles.error}>
+          {lotQuery.error instanceof ApiError ? lotQuery.error.message : 'Could not load the lot'}
+        </p>
+      </div>
     )
   }
 
@@ -50,14 +70,11 @@ export function LotPage() {
 
   return (
     <div>
-      <Link to="/tanks" className={styles.breadcrumb}>
-        <IconArrowLeft size={16} stroke={1.9} />
-        Back
-      </Link>
+      {back}
 
       <div className={styles.header}>
         <div className={styles.headerMain}>
-          <span className={`mono ${styles.code}`}>{lot.code}</span>
+          <h1 className={`mono ${styles.code}`}>{lot.code}</h1>
           {lot.name && <span className={styles.name}>{lot.name}</span>}
         </div>
         <div className={styles.headerMeta}>
@@ -80,23 +97,31 @@ export function LotPage() {
             <Fact label="Latest gravity" value={lot.latest_sg ?? '—'} mono />
           </>
         ) : (
+          // Packaged: sparkling/still is already a header pill, so these facts
+          // cover what's left - pack size, strength, closure, and the tax owed.
           <>
-            <Fact
-              label="Units"
-              value={
-                lot.unit_count != null && lot.unit_volume_l != null
-                  ? `${lot.unit_count} × ${lot.unit_volume_l} L`
-                  : `${fixed(lot.current_volume_l, 0)} L`
-              }
-              mono
-            />
+            {lot.unit_count != null && lot.unit_volume_l != null ? (
+              <Fact
+                label="Units"
+                value={`${lot.unit_count} × ${lot.unit_volume_l} L`}
+                sub={`${fixed(lot.current_volume_l, 0)} L total`}
+                mono
+              />
+            ) : (
+              <Fact label="Volume" value={`${fixed(lot.current_volume_l, 0)} L`} mono />
+            )}
             <Fact label="ABV" value={abvText(lot)} sub={lot.abv_method ?? undefined} mono />
-            <Fact
-              label="Type"
-              value={lot.sparkling ? 'Sparkling' : 'Still'}
-              sub={lot.closure ?? undefined}
-            />
-            <Fact label="Volume" value={`${fixed(lot.current_volume_l, 0)} L`} mono />
+            <Fact label="Closure" value={lot.closure ? cap(lot.closure) : '—'} />
+            {duty.data ? (
+              <Fact
+                label="Duty owed"
+                value={gbp(duty.data.duty_owed)}
+                sub={`Duty point ${shortDate(duty.data.duty_point_date)}`}
+                mono
+              />
+            ) : (
+              <Fact label="Duty owed" value="—" sub={duty.isPending ? undefined : 'Not released yet'} />
+            )}
           </>
         )}
       </div>
@@ -151,8 +176,4 @@ function Flag({ text }: { text: string }) {
       <span>{text}</span>
     </div>
   )
-}
-
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
 }

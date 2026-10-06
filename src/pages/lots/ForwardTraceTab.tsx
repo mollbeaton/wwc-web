@@ -40,12 +40,12 @@ export function ForwardTraceTab({ lotId }: { lotId: string }) {
 
       <div className={styles.recallCards}>
         <RecallCard label="Ready for sale" value={ready} tone="green" />
-        <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="amber" />
+        <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="grey" />
         <RecallCard label="Still in vessels" value={inVessels} tone="blue" />
       </div>
 
       <div className="card">
-        <h3 className={styles.sectionTitle}>Descendants</h3>
+        <h2 className={styles.sectionTitle}>Descendants</h2>
         {nodes.length === 0 ? (
           <p className={styles.muted}>Nothing has come off this lot yet.</p>
         ) : (
@@ -72,7 +72,7 @@ function RecallCard({
 }: {
   label: string
   value: number
-  tone: 'green' | 'amber' | 'blue'
+  tone: 'green' | 'grey' | 'blue'
 }) {
   return (
     <div className={`${styles.recallCard} ${styles[`recall_${tone}`]}`}>

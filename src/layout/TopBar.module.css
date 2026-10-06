@@ -1,4 +1,7 @@
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -42,12 +45,21 @@
   gap: 14px;
   margin-left: auto;
 }
-.date {
-  font-size: 13.5px;
-  color: var(--ink-muted);
-  white-space: nowrap;
+.who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
-.signout {
+.email {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.iconBtn {
   display: grid;
   place-items: center;
   width: 38px;
@@ -57,7 +69,34 @@
   background: var(--surface-2);
   color: var(--ink-2);
 }
-.signout:hover {
+.iconBtn:hover {
   border-color: var(--ink-muted);
   color: var(--ink);
+}
+
+/* The menu button only exists while the sidebar is a drawer. */
+.menu {
+  display: none;
+  flex-shrink: 0;
+}
+.iconBtn {
+  flex-shrink: 0;
+}
+@media (max-width: 900px) {
+  .menu {
+    display: grid;
+  }
+}
+@media (max-width: 760px) {
+  .email {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .topbar {
+    gap: 10px;
+  }
+  .who {
+    display: none;
+  }
 }

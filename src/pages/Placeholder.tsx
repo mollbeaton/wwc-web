@@ -15,7 +15,7 @@ export function Placeholder({
   return (
     <div>
       <PageHeader title={title} subtitle={subtitle} />
-      <div className="card" style={{ color: 'var(--ink-muted)' }}>
+      <div className="card muted">
         Coming soon — {spec}.
       </div>
     </div>

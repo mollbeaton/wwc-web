@@ -21,7 +21,7 @@ export function ListState({
     return (
       <p className={styles.empty}>
         Couldn’t load.{' '}
-        <button type="button" className={styles.retry} onClick={onRetry}>
+        <button type="button" className="text-link" onClick={onRetry}>
           Retry
         </button>
       </p>

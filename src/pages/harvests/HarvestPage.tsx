@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { IconArrowLeft } from '@tabler/icons-react'
 import { Link, useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { harvestsApi, orchardsApi } from '../../api/harvests'
 import type { ForwardTraceNode } from '../../api/lots'
-import { fixed, shortDate } from '../../lib/format'
+import { BackLink } from '../../components/BackLink'
+import { cap, fixed, shortDate } from '../../lib/format'
 import styles from './HarvestPage.module.css'
 import lotStyles from '../lots/LotPage.module.css'
 
@@ -47,14 +47,11 @@ export function HarvestPage() {
 
   return (
     <div>
-      <Link to="/trace" className={lotStyles.breadcrumb}>
-        <IconArrowLeft size={16} stroke={1.9} />
-        Back to Trace
-      </Link>
+      <BackLink fallbackTo="/trace" fallbackLabel="Trace" />
 
       <div className={lotStyles.header}>
         <div className={lotStyles.headerMain}>
-          <span className={`mono ${lotStyles.code}`}>{h.code}</span>
+          <h1 className={`mono ${lotStyles.code}`}>{h.code}</h1>
           <span className={lotStyles.name}>{orchardName}</span>
         </div>
         <div className={lotStyles.headerMeta}>
@@ -69,8 +66,8 @@ export function HarvestPage() {
         <Fact label="Varieties" value={String(h.varieties.length)} />
       </div>
 
-      <div className="card" style={{ marginBottom: 16 }}>
-        <h3 className={lotStyles.sectionTitle}>Varieties</h3>
+      <div className={`card ${styles.section}`}>
+        <h2 className={lotStyles.sectionTitle}>Varieties</h2>
         {h.varieties.map((v, i) => (
           <div key={i} className={styles.varietyRow}>
             <span className={styles.varietyName}>{v.variety}</span>
@@ -81,12 +78,12 @@ export function HarvestPage() {
 
       <div className={lotStyles.recallCards}>
         <RecallCard label="Ready for sale" value={ready} tone="green" />
-        <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="amber" />
+        <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="grey" />
         <RecallCard label="Still in vessels" value={inVessels} tone="blue" />
       </div>
 
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3 className={lotStyles.sectionTitle}>Where it went</h3>
+      <div className={`card ${styles.sectionAfter}`}>
+        <h2 className={lotStyles.sectionTitle}>Where it went</h2>
         {nodes.length === 0 ? (
           <p className={lotStyles.muted}>Nothing has been traced forward from this harvest yet.</p>
         ) : (
@@ -122,7 +119,7 @@ function RecallCard({
 }: {
   label: string
   value: number
-  tone: 'green' | 'amber' | 'blue'
+  tone: 'green' | 'grey' | 'blue'
 }) {
   return (
     <div className={`${lotStyles.recallCard} ${lotStyles[`recall_${tone}`]}`}>
@@ -130,8 +127,4 @@ function RecallCard({
       <div className={lotStyles.recallLabel}>{label}</div>
     </div>
   )
-}
-
-function cap(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
 }
