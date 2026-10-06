@@ -17,6 +17,7 @@ import {
 } from './pages/manage/referenceListPages'
 import { UsersPage } from './pages/manage/UsersPage'
 import { VesselsPage } from './pages/manage/VesselsPage'
+import { ReadyForSalePage } from './pages/ready/ReadyForSalePage'
 import { TanksPage } from './pages/tanks/TanksPage'
 import { TraceIndex } from './pages/trace/TraceIndex'
 import type { ReactNode } from 'react'
@@ -42,6 +43,7 @@ export function App() {
           <Route path="/tanks" element={<TanksPage />} />
           <Route path="/lots/:lotId" element={<LotPage />} />
           <Route path="/trace" element={<TraceIndex />} />
+          <Route path="/ready-for-sale" element={<ReadyForSalePage />} />
           <Route path="/harvests/:harvestId" element={<HarvestPage />} />
           <Route
             path="/duty"

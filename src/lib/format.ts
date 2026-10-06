@@ -57,3 +57,20 @@ export function cap(s: string): string {
 export function vesselTypeLabel(type: string): string {
   return type === 'ibc' ? 'IBC' : cap(type)
 }
+
+/** A lot's packaging format. "Bulk" is a tank lot released by the old
+ *  bulk-from-tank dispatch, before ready-for-sale became packaged-only. */
+export function lotKindLabel(kind: string): string {
+  switch (kind) {
+    case 'bottle':
+      return 'Bottle'
+    case 'can':
+      return 'Can'
+    case 'bag_in_box':
+      return 'Bag-in-box'
+    case 'tank':
+      return 'Bulk'
+    default:
+      return cap(kind.replace(/_/g, ' '))
+  }
+}

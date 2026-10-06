@@ -7,6 +7,7 @@ import {
   IconFlask,
   IconGrave2,
   IconMapPin,
+  IconPackageExport,
   IconPlant2,
   IconTruck,
   IconUsers,
@@ -27,13 +28,15 @@ export interface NavItem {
 
 const ALL: Role[] = ['admin', 'cellar', 'viewer']
 
-// Main nav. Role visibility per the handoff: Cellar sees Tanks + Trace; Viewer
+// Main nav. Role visibility per the handoff: Cellar sees Tanks + Trace (and
+// Ready for sale - finished stock, no money); Viewer
 // adds Duty (read-only); Admin sees everything including Manage.
 export const MAIN_NAV: NavItem[] = [
   { to: '/tanks', label: 'Tanks', icon: IconBuildingWarehouse, roles: ALL },
   // Lot and harvest pages are trace views (history, backward and forward
   // trace), whichever list you opened them from.
   { to: '/trace', label: 'Trace', icon: IconDroplet, roles: ALL, alsoActiveFor: ['/lots/', '/harvests/'] },
+  { to: '/ready-for-sale', label: 'Ready for sale', icon: IconPackageExport, roles: ALL },
   { to: '/duty', label: 'Duty', icon: IconCurrencyPound, roles: ['admin', 'viewer'] },
   { to: '/duty-settings', label: 'Duty settings', icon: IconAdjustments, roles: ['admin'] },
 ]

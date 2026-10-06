@@ -33,6 +33,8 @@ export interface Lot {
   composition: LotComposition[]
   parent_lot_ids: string[]
   ready_for_sale_volume_l: string
+  /** When the lot was marked ready for sale (its duty point); null until then. */
+  ready_for_sale_at: string | null
   lost_volume_l: string
 }
 
