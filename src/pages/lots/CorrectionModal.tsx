@@ -33,10 +33,12 @@ export function CorrectionModal({
   const [when, setWhen] = useState(new Date(event.occurred_at).toISOString().slice(0, 16))
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
+  // Minted once when the modal opens, not per Save: a retry after a failed
+  // save must resend the same id so the API can't record the correction twice.
+  const [id] = useState(() => crypto.randomUUID())
 
   const save = useMutation({
     mutationFn: () => {
-      const id = crypto.randomUUID()
       const occurred_at = mode === 'time' ? new Date(when).toISOString() : event.occurred_at
       const amount = mode === 'value' ? value : currentValue
       if (isLoss) {
