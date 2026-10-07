@@ -40,7 +40,8 @@ export function ImportDialog({
     let added = 0
     for (const row of parsed.toCreate) {
       try {
-        await config.api.create(row)
+        // Each imported row is its own record, so its own client-minted id.
+        await config.api.create({ ...row, id: crypto.randomUUID() })
         added++
       } catch (e) {
         failed.push({

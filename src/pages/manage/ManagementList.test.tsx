@@ -113,6 +113,24 @@ describe('ManagementList', () => {
     expect(await screen.findByText('Thorn')).toBeInTheDocument()
   })
 
+  it('sends a client id on create and reuses it when a failed save is retried', async () => {
+    const api = makeFakeReferenceApi(seed)
+    vi.mocked(api.create).mockRejectedValueOnce(new Error('network down'))
+    const { user } = renderWithClient(<ManagementList config={config(api)} />)
+    await screen.findByText('Dabinett')
+
+    await user.click(screen.getByRole('button', { name: /Add variety/ }))
+    await user.type(screen.getByLabelText('Name'), 'Thorn')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Could not save')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Thorn')).toBeInTheDocument()
+
+    const [first, retry] = vi.mocked(api.create).mock.calls.map(([body]) => body.id)
+    expect(first).toMatch(/^[0-9a-f-]{36}$/)
+    expect(retry).toBe(first)
+  })
+
   it('shows a loading state while the list is in flight', () => {
     const api = makeFakeReferenceApi(seed)
     api.list = vi.fn((): Promise<RefItem[]> => new Promise(() => {})) // never resolves

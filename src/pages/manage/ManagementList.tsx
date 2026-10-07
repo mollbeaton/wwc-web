@@ -244,6 +244,10 @@ function Detail({
   })
   const [error, setError] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  // The API requires a client-minted id on create so a retried save can't add
+  // a duplicate. Minted once per panel (it remounts for each new add) and
+  // reused if Save is pressed again after a failure.
+  const [newId] = useState(() => crypto.randomUUID())
 
   const changeLog = useQuery({
     queryKey: [config.queryKey, item?.id, 'change-log'],
@@ -252,7 +256,8 @@ function Detail({
   })
 
   const save = useMutation({
-    mutationFn: (body: RefBody) => (item ? config.api.update(item.id, body) : config.api.create(body)),
+    mutationFn: (body: RefBody) =>
+      item ? config.api.update(item.id, body) : config.api.create({ ...body, id: newId }),
     onSuccess: onDone,
     onError: (e) => setError(e instanceof ApiError ? e.message : 'Could not save'),
   })

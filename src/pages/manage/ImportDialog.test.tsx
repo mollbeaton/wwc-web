@@ -60,7 +60,7 @@ describe('ImportDialog', () => {
     await user.click(screen.getByRole('button', { name: 'Import 1' }))
 
     await waitFor(() => expect(api.create).toHaveBeenCalledTimes(1))
-    expect(api.create).toHaveBeenCalledWith({ name: 'Michelin', fruit: 'apple' })
+    expect(api.create).toHaveBeenCalledWith({ name: 'Michelin', fruit: 'apple', id: expect.any(String) })
     expect(await screen.findByText('Added 1')).toBeInTheDocument()
     expect(onImported).toHaveBeenCalled()
   })
