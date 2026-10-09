@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { harvestsApi, orchardsApi } from '../../api/harvests'
 import { lotsApi } from '../../api/lots'
 import { PageHeader } from '../../components/PageHeader'
@@ -37,6 +37,13 @@ export function TraceIndex() {
       .toLowerCase()
     return hay.includes(q)
   })
+
+  // Someone holding a returned bottle types the code off its label - an
+  // exact lot (or harvest) code goes straight there, no results list.
+  const exactLot = q ? (lots.data ?? []).find((l) => l.code.toLowerCase() === q) : undefined
+  if (exactLot) return <Navigate to={`/lots/${exactLot.id}?tab=trace`} replace />
+  const exactHarvest = q ? (harvests.data ?? []).find((h) => h.code.toLowerCase() === q) : undefined
+  if (exactHarvest) return <Navigate to={`/harvests/${exactHarvest.id}`} replace />
 
   return (
     <div>

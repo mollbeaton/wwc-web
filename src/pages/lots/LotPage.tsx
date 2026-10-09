@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { IconAlertTriangle } from '@tabler/icons-react'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { lotsApi, type Lot } from '../../api/lots'
 import { vesselsApi } from '../../api/vessels'
@@ -22,7 +22,9 @@ const TABS: TabDef<LotTab>[] = [
 
 export function LotPage() {
   const { lotId = '' } = useParams()
-  const [tab, setTab] = useState<LotTab>('history')
+  // ?tab=trace opens straight on the trace - where a code search lands.
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<LotTab>(params.get('tab') === 'trace' ? 'trace' : 'history')
 
   const vessels = useQuery({ queryKey: ['vessels'], queryFn: vesselsApi.list })
   const lotQuery = useQuery({ queryKey: ['lot', lotId], queryFn: () => lotsApi.get(lotId) })
