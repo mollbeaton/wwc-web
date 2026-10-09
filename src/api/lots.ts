@@ -65,14 +65,6 @@ export interface BackwardTrace {
   composition: LotComposition[]
 }
 
-export interface ForwardTraceNode {
-  lot_id: string
-  code: string
-  kind: string
-  status: string
-  is_ready_for_sale: boolean
-}
-
 export interface LotEvent {
   id: string
   occurred_at: string
@@ -117,7 +109,6 @@ export const lotsApi = {
   reconciliation: (lotId: string) => api.get<Reconciliation>(`/lots/${lotId}/reconciliation`),
   dutyLine: (lotId: string) => api.get<DutyLine | null>(`/lots/${lotId}/duty`),
   backwardTrace: (lotId: string) => api.get<BackwardTrace>(`/lots/${lotId}/trace/backward`),
-  forwardTrace: (lotId: string) => api.get<ForwardTraceNode[]>(`/lots/${lotId}/trace/forward`),
   events: (lotId: string) => api.get<LotEvent[]>(`/lots/${lotId}/events`),
   correctLoss: (lotId: string, lossId: string, body: LossCorrection) =>
     api.post<unknown>(`/lots/${lotId}/loss/${lossId}/correct`, body),

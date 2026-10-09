@@ -9,17 +9,15 @@ import { BackLink } from '../../components/BackLink'
 import { Tabs, type TabDef } from '../../components/Tabs'
 import { cap, fixed, gbp, shortDate } from '../../lib/format'
 import { lotStatusPill } from '../../lib/lotStatus'
-import { BackwardTraceTab } from './BackwardTraceTab'
-import { ForwardTraceTab } from './ForwardTraceTab'
 import { HistoryTab } from './HistoryTab'
+import { TraceTab } from './TraceTab'
 import styles from './LotPage.module.css'
 
-type LotTab = 'history' | 'backward' | 'forward'
+type LotTab = 'history' | 'trace'
 
 const TABS: TabDef<LotTab>[] = [
   { value: 'history', label: 'History' },
-  { value: 'backward', label: 'Backward trace' },
-  { value: 'forward', label: 'Forward trace' },
+  { value: 'trace', label: 'Trace' },
 ]
 
 export function LotPage() {
@@ -139,8 +137,7 @@ export function LotPage() {
 
       <Tabs tabs={TABS} active={tab} onChange={setTab} />
       {tab === 'history' && <HistoryTab lotId={lotId} />}
-      {tab === 'backward' && <BackwardTraceTab lotId={lotId} />}
-      {tab === 'forward' && <ForwardTraceTab lotId={lotId} />}
+      {tab === 'trace' && <TraceTab lotId={lotId} />}
     </div>
   )
 }

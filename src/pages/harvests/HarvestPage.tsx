@@ -1,19 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { harvestsApi, orchardsApi } from '../../api/harvests'
-import type { ForwardTraceNode } from '../../api/lots'
+import { traceApi } from '../../api/trace'
 import { BackLink } from '../../components/BackLink'
+import { RecallSummary } from '../../components/trace/RecallSummary'
+import { TraceDiagram } from '../../components/trace/TraceDiagram'
 import { cap, fixed, shortDate } from '../../lib/format'
 import styles from './HarvestPage.module.css'
 import lotStyles from '../lots/LotPage.module.css'
-
-function nodePill(node: ForwardTraceNode): { label: string; cls: string } {
-  if (node.is_ready_for_sale) return { label: 'Ready for sale', cls: 'pill--green' }
-  if (node.status === 'ended') return { label: 'Ended', cls: 'pill--grey' }
-  if (node.kind !== 'tank') return { label: 'Packaged', cls: 'pill--dashed' }
-  return { label: 'In vessel', cls: 'pill--blue' }
-}
 
 export function HarvestPage() {
   const { harvestId = '' } = useParams()
@@ -22,9 +17,9 @@ export function HarvestPage() {
     queryFn: () => harvestsApi.get(harvestId),
   })
   const orchards = useQuery({ queryKey: ['orchards'], queryFn: orchardsApi.list })
-  const forward = useQuery({
-    queryKey: ['harvest', harvestId, 'forward'],
-    queryFn: () => harvestsApi.forwardTrace(harvestId),
+  const graph = useQuery({
+    queryKey: ['harvest', harvestId, 'trace-graph'],
+    queryFn: () => traceApi.harvest(harvestId),
   })
 
   if (harvest.isLoading) return <p className={lotStyles.muted}>Loading…</p>
@@ -40,10 +35,6 @@ export function HarvestPage() {
   const orchardName =
     (orchards.data ?? []).find((o) => o.id === h.orchard_id)?.name ?? 'Orchard'
   const totalKg = h.varieties.reduce((sum, v) => sum + (v.weight_kg ? Number(v.weight_kg) : 0), 0)
-  const nodes = forward.data ?? []
-  const ready = nodes.filter((n) => n.is_ready_for_sale).length
-  const packagedNotReady = nodes.filter((n) => n.kind !== 'tank' && !n.is_ready_for_sale).length
-  const inVessels = nodes.filter((n) => n.kind === 'tank' && n.status === 'active').length
 
   return (
     <div>
@@ -76,29 +67,27 @@ export function HarvestPage() {
         ))}
       </div>
 
-      <div className={lotStyles.recallCards}>
-        <RecallCard label="Ready for sale" value={ready} tone="green" />
-        <RecallCard label="Packaged, not ready" value={packagedNotReady} tone="grey" />
-        <RecallCard label="Still in vessels" value={inVessels} tone="blue" />
-      </div>
-
-      <div className={`card ${styles.sectionAfter}`}>
+      <div className={`card ${styles.section}`}>
         <h2 className={lotStyles.sectionTitle}>Where it went</h2>
-        {nodes.length === 0 ? (
+        {graph.isError ? (
+          <p className={lotStyles.error}>
+            Couldn’t load the trace.{' '}
+            <button type="button" className="text-link" onClick={() => void graph.refetch()}>
+              Retry
+            </button>
+          </p>
+        ) : !graph.data ? (
+          <p className={lotStyles.muted}>Loading…</p>
+        ) : graph.data.nodes.length <= 1 ? (
           <p className={lotStyles.muted}>Nothing has been traced forward from this harvest yet.</p>
         ) : (
-          nodes.map((node) => {
-            const pill = nodePill(node)
-            return (
-              <Link key={node.lot_id} to={`/lots/${node.lot_id}`} className={lotStyles.descendant}>
-                <span className="mono">{node.code}</span>
-                <span className={lotStyles.descKind}>{node.kind.replace(/_/g, ' ')}</span>
-                <span className={`pill ${pill.cls}`}>{pill.label}</span>
-              </Link>
-            )
-          })
+          <TraceDiagram graph={graph.data} />
         )}
       </div>
+
+      {graph.data && graph.data.nodes.length > 1 && (
+        <RecallSummary title="Where this fruit is now" lines={graph.data.recall_family} />
+      )}
     </div>
   )
 }
@@ -108,23 +97,6 @@ function Fact({ label, value, mono }: { label: string; value: string; mono?: boo
     <div className={lotStyles.fact}>
       <div className={lotStyles.factLabel}>{label}</div>
       <div className={`${mono ? 'mono ' : ''}${lotStyles.factValue}`}>{value}</div>
-    </div>
-  )
-}
-
-function RecallCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string
-  value: number
-  tone: 'green' | 'grey' | 'blue'
-}) {
-  return (
-    <div className={`${lotStyles.recallCard} ${lotStyles[`recall_${tone}`]}`}>
-      <div className={`mono ${lotStyles.recallValue}`}>{value}</div>
-      <div className={lotStyles.recallLabel}>{label}</div>
     </div>
   )
 }

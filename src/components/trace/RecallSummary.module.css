@@ -1,0 +1,39 @@
+.title {
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.muted {
+  color: var(--ink-muted);
+  margin: 0;
+}
+.lines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 12px;
+}
+.line {
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.lineLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.lineValue {
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.green {
+  background: var(--green-soft);
+}
+.grey {
+  background: var(--surface-2);
+}
+.blue {
+  background: var(--blue-soft);
+}

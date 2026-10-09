@@ -1,0 +1,131 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.swatch {
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+}
+.swatchFocus {
+  border: 2px solid var(--amber);
+  background: var(--amber-soft);
+}
+.swatchRelated {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.svg {
+  display: block;
+}
+
+.edge {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.4;
+}
+.arrow {
+  fill: var(--border-strong);
+}
+.edgeLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-muted);
+}
+
+.box {
+  fill: var(--surface);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.typeBar {
+  fill: var(--chip);
+}
+.type_harvest .typeBar {
+  fill: var(--green);
+}
+.type_intake .typeBar {
+  fill: var(--blue);
+}
+.type_lot .typeBar {
+  fill: var(--amber);
+}
+
+.codeText {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+.titleText {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+.subText {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  fill: var(--ink-2);
+}
+.metaText {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-muted);
+}
+
+.focus .box {
+  fill: var(--amber-soft);
+  stroke: var(--amber);
+  stroke-width: 2;
+}
+.related {
+  opacity: 0.45;
+}
+.related .box {
+  stroke-dasharray: 4 3;
+}
+
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover .box,
+.clickable:focus-visible .box {
+  stroke: var(--ink-2);
+}
+.clickable:focus-visible {
+  outline: none;
+}

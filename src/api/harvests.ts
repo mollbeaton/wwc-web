@@ -1,5 +1,4 @@
 import { api } from './client'
-import type { ForwardTraceNode } from './lots'
 
 export interface HarvestVariety {
   variety: string
@@ -26,8 +25,6 @@ export interface Orchard {
 export const harvestsApi = {
   list: () => api.get<Harvest[]>('/harvests'),
   get: (harvestId: string) => api.get<Harvest>(`/harvests/${harvestId}`),
-  forwardTrace: (harvestId: string) =>
-    api.get<ForwardTraceNode[]>(`/harvests/${harvestId}/trace/forward`),
 }
 
 export const orchardsApi = {

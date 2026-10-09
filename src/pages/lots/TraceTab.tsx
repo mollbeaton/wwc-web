@@ -1,19 +1,43 @@
 import { useQuery } from '@tanstack/react-query'
 import { IconDownload } from '@tabler/icons-react'
-import { Link } from 'react-router-dom'
 import { downloadFile } from '../../api/client'
 import { lotsApi } from '../../api/lots'
+import { traceApi } from '../../api/trace'
+import { RecallSummary } from '../../components/trace/RecallSummary'
+import { TraceDiagram } from '../../components/trace/TraceDiagram'
 import { fixed, shortDate } from '../../lib/format'
 import styles from './LotPage.module.css'
 
-export function BackwardTraceTab({ lotId }: { lotId: string }) {
-  const query = useQuery({
+/** Two-way traceability for a lot: the lineage diagram (back to the fruit,
+ *  forward to where it went, and everything else sharing its fruit), where
+ *  the product is now, then the detail - fruit composition, bought-in juice
+ *  and additions. */
+export function TraceTab({ lotId }: { lotId: string }) {
+  const graph = useQuery({ queryKey: ['lot', lotId, 'trace-graph'], queryFn: () => traceApi.lot(lotId) })
+  const backward = useQuery({
     queryKey: ['lot', lotId, 'backward'],
     queryFn: () => lotsApi.backwardTrace(lotId),
   })
 
-  if (!query.data) return <p className={styles.muted}>Loading…</p>
-  const trace = query.data
+  if (graph.isError || backward.isError) {
+    return (
+      <p className={styles.error}>
+        Couldn’t load the trace.{' '}
+        <button
+          type="button"
+          className="text-link"
+          onClick={() => {
+            void graph.refetch()
+            void backward.refetch()
+          }}
+        >
+          Retry
+        </button>
+      </p>
+    )
+  }
+  if (!graph.data || !backward.data) return <p className={styles.muted}>Loading…</p>
+  const trace = backward.data
 
   return (
     <div className={styles.tabBody}>
@@ -24,9 +48,28 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
             void downloadFile(`/lots/${lotId}/trace/backward/csv`, `trace-back-${lotId}.csv`)
           }
         >
-          <IconDownload size={16} stroke={1.8} /> Export CSV
+          <IconDownload size={16} stroke={1.8} /> Backward CSV
+        </button>
+        <button
+          className="btn"
+          onClick={() =>
+            void downloadFile(`/lots/${lotId}/trace/forward/csv`, `trace-forward-${lotId}.csv`)
+          }
+        >
+          <IconDownload size={16} stroke={1.8} /> Forward CSV
         </button>
       </div>
+
+      <div className="card">
+        <h2 className={styles.sectionTitle}>Lineage</h2>
+        <TraceDiagram graph={graph.data} />
+      </div>
+
+      <RecallSummary
+        title="Where this lot is now (and what came from it)"
+        lines={graph.data.recall_direct}
+      />
+      <RecallSummary title="Everything sharing its fruit" lines={graph.data.recall_family} />
 
       <div className="card">
         <h2 className={styles.sectionTitle}>Where the fruit came from</h2>
@@ -77,19 +120,6 @@ export function BackwardTraceTab({ lotId }: { lotId: string }) {
               </span>
             </div>
           ))}
-        </div>
-      )}
-
-      {trace.ancestor_lot_ids.length > 0 && (
-        <div className="card">
-          <h2 className={styles.sectionTitle}>Parent lots</h2>
-          <div className={styles.ancestors}>
-            {trace.ancestor_lot_ids.map((id) => (
-              <Link key={id} to={`/lots/${id}`} className={styles.ancestorLink}>
-                View parent lot
-              </Link>
-            ))}
-          </div>
         </div>
       )}
     </div>
