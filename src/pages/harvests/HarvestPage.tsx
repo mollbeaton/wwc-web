@@ -4,6 +4,7 @@ import { ApiError } from '../../api/client'
 import { harvestsApi, orchardsApi } from '../../api/harvests'
 import { traceApi } from '../../api/trace'
 import { BackLink } from '../../components/BackLink'
+import { DownloadButton } from '../../components/DownloadButton'
 import { RecallSummary } from '../../components/trace/RecallSummary'
 import { TraceDiagram } from '../../components/trace/TraceDiagram'
 import { cap, fixed, shortDate } from '../../lib/format'
@@ -47,6 +48,9 @@ export function HarvestPage() {
         </div>
         <div className={lotStyles.headerMeta}>
           <span className="pill pill--grey">{cap(h.fruit)}</span>
+          <DownloadButton path={`/harvests/${harvestId}/trace/report.pdf`} filename={`trace-${h.code}.pdf`} primary>
+            PDF report
+          </DownloadButton>
         </div>
       </div>
 

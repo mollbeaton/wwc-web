@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { IconDownload } from '@tabler/icons-react'
-import { downloadFile } from '../../api/client'
 import { lotsApi } from '../../api/lots'
 import { traceApi } from '../../api/trace'
+import { DownloadButton } from '../../components/DownloadButton'
 import { RecallSummary } from '../../components/trace/RecallSummary'
 import { TraceDiagram } from '../../components/trace/TraceDiagram'
 import { fixed, shortDate } from '../../lib/format'
@@ -38,26 +37,20 @@ export function TraceTab({ lotId }: { lotId: string }) {
   }
   if (!graph.data || !backward.data) return <p className={styles.muted}>Loading…</p>
   const trace = backward.data
+  const code = graph.data.nodes.find((n) => n.role === 'focus')?.title ?? lotId
 
   return (
     <div className={styles.tabBody}>
       <div className={styles.traceActions}>
-        <button
-          className="btn"
-          onClick={() =>
-            void downloadFile(`/lots/${lotId}/trace/backward/csv`, `trace-back-${lotId}.csv`)
-          }
-        >
-          <IconDownload size={16} stroke={1.8} /> Backward CSV
-        </button>
-        <button
-          className="btn"
-          onClick={() =>
-            void downloadFile(`/lots/${lotId}/trace/forward/csv`, `trace-forward-${lotId}.csv`)
-          }
-        >
-          <IconDownload size={16} stroke={1.8} /> Forward CSV
-        </button>
+        <DownloadButton path={`/lots/${lotId}/trace/backward/csv`} filename={`trace-back-${code}.csv`}>
+          Backward CSV
+        </DownloadButton>
+        <DownloadButton path={`/lots/${lotId}/trace/forward/csv`} filename={`trace-forward-${code}.csv`}>
+          Forward CSV
+        </DownloadButton>
+        <DownloadButton path={`/lots/${lotId}/trace/report.pdf`} filename={`trace-${code}.pdf`} primary>
+          PDF report
+        </DownloadButton>
       </div>
 
       <div className="card">
