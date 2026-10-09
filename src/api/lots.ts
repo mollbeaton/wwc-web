@@ -15,7 +15,8 @@ export interface Lot {
   code: string
   name: string | null
   status: string
-  stage: string
+  // Whether the SG is still falling, derived by the API from the readings.
+  still_fermenting: boolean
   product_type: 'cider' | 'wine' | null
   // What the lot shows as; perry = pear cider. Falls back to product_type.
   display_type: 'cider' | 'perry' | 'wine' | null

@@ -14,7 +14,7 @@ function lot(code: string, extra: Partial<Lot> = {}): Lot {
     code,
     name: null,
     status: 'active',
-    stage: 'conditioning',
+    still_fermenting: false,
     product_type: 'cider',
     display_type: 'cider',
     current_volume_l: '0',
