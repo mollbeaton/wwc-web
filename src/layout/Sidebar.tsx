@@ -3,13 +3,14 @@ import { useEffect, useId } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import type { Role } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
-import { MAIN_NAV, MANAGE_NAV, visibleFor, type NavItem } from './nav'
+import { MAIN_NAV, MANAGE_NAV, STOCK_NAV, visibleFor, type NavItem } from './nav'
 import styles from './Sidebar.module.css'
 
 const ROLE_LABELS: Record<Role, string> = {
   admin: 'Admin',
   cellar: 'Cellar',
   viewer: 'Viewer',
+  seller: 'Seller',
 }
 
 /** The app's nav. A fixed column on wide screens; below 900px it's a drawer
@@ -17,6 +18,7 @@ const ROLE_LABELS: Record<Role, string> = {
 export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void }) {
   const { user, effectiveRole, previewRole, setPreviewRole } = useAuth()
   const mainItems = visibleFor(MAIN_NAV, effectiveRole)
+  const stockItems = visibleFor(STOCK_NAV, effectiveRole)
   const manageItems = visibleFor(MANAGE_NAV, effectiveRole)
   const previewId = useId()
 
@@ -49,6 +51,17 @@ export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: (
         ))}
       </div>
 
+      {stockItems.length > 0 && (
+        <>
+          <div className={styles.groupHeading}>Stock</div>
+          <div className={styles.group}>
+            {stockItems.map((item) => (
+              <NavItemLink key={item.to} item={item} />
+            ))}
+          </div>
+        </>
+      )}
+
       {manageItems.length > 0 && (
         <>
           <div className={styles.groupHeading}>Manage</div>
@@ -78,7 +91,7 @@ export function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: (
               setPreviewRole(next === user.role ? null : next)
             }}
           >
-            {(['admin', 'cellar', 'viewer'] as Role[]).map((r) => (
+            {(['admin', 'cellar', 'viewer', 'seller'] as Role[]).map((r) => (
               <option key={r} value={r}>
                 {ROLE_LABELS[r]}
                 {r === user.role ? ' (you)' : ''}

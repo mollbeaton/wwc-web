@@ -103,6 +103,26 @@ export interface AdditionCorrection {
   note: string
 }
 
+export interface ReadyForSaleInput {
+  id: string
+  occurred_at: string
+  product_type: 'cider' | 'wine'
+  /** Required when the lot has no product yet. */
+  product_id?: string
+}
+
+/** One sale (or return) that took units of a lot - the recall view. */
+export interface SoldTo {
+  sale_id: string
+  reference: string
+  kind: 'sale' | 'return'
+  customer_id: string
+  customer_name: string
+  qty: number
+  sold_at: string
+  invoice_number: string | null
+}
+
 export const lotsApi = {
   list: () => api.get<Lot[]>('/lots'),
   get: (lotId: string) => api.get<Lot>(`/lots/${lotId}`),
@@ -114,4 +134,7 @@ export const lotsApi = {
     api.post<unknown>(`/lots/${lotId}/loss/${lossId}/correct`, body),
   correctAddition: (lotId: string, additionId: string, body: AdditionCorrection) =>
     api.post<unknown>(`/lots/${lotId}/additions/${additionId}/correct`, body),
+  markReadyForSale: (lotId: string, body: ReadyForSaleInput) =>
+    api.post<unknown>(`/lots/${lotId}/ready-for-sale`, body),
+  soldTo: (lotId: string) => api.get<SoldTo[]>(`/lots/${lotId}/sold-to`),
 }

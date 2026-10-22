@@ -10,14 +10,16 @@ import { Tabs, type TabDef } from '../../components/Tabs'
 import { cap, fixed, gbp, shortDate } from '../../lib/format'
 import { lotStatusPill } from '../../lib/lotStatus'
 import { HistoryTab } from './HistoryTab'
+import { SoldToTab } from './SoldToTab'
 import { TraceTab } from './TraceTab'
 import styles from './LotPage.module.css'
 
-type LotTab = 'history' | 'trace'
+type LotTab = 'history' | 'trace' | 'sold-to'
 
 const TABS: TabDef<LotTab>[] = [
   { value: 'history', label: 'History' },
   { value: 'trace', label: 'Trace' },
+  { value: 'sold-to', label: 'Sold to' },
 ]
 
 export function LotPage() {
@@ -140,6 +142,7 @@ export function LotPage() {
       <Tabs tabs={TABS} active={tab} onChange={setTab} />
       {tab === 'history' && <HistoryTab lotId={lotId} />}
       {tab === 'trace' && <TraceTab lotId={lotId} />}
+      {tab === 'sold-to' && <SoldToTab lotId={lotId} />}
     </div>
   )
 }

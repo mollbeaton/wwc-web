@@ -1,0 +1,28 @@
+# Render Blueprint for the stock prototype's DEMO dashboard: a separate static
+# site deployed from the prototype/stock branch (never main), pointed at the
+# demo API (wwc-api's render.demo.yaml), not production.
+#
+# Create it from the Render dashboard: New -> Blueprint -> this repo, branch
+# prototype/stock, Blueprint path "render.demo.yaml", then set
+# VITE_API_BASE_URL to the demo API's URL, e.g. https://wwc-api-demo.onrender.com
+
+services:
+  - type: web
+    name: wwc-dashboard-demo
+    runtime: static
+    branch: prototype/stock
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    pullRequestPreviewsEnabled: false
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

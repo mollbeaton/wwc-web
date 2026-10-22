@@ -1,13 +1,18 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
-import { RequireAuth, RequireRole } from './auth/guards'
+import { HomeRedirect, RequireAuth, RequireRole } from './auth/guards'
 import { LoginPage } from './auth/LoginPage'
 import { AppShell } from './layout/AppShell'
 import { DutyPage } from './pages/duty/DutyPage'
 import { DutySettings } from './pages/duty/DutySettings'
 import { HarvestPage } from './pages/harvests/HarvestPage'
+import { KegsPage } from './pages/kegs/KegsPage'
 import { LotPage } from './pages/lots/LotPage'
+import { CustomersPage } from './pages/manage/CustomersPage'
+import { LocationsPage } from './pages/manage/LocationsPage'
 import { OrchardsPage } from './pages/manage/OrchardsPage'
+import { PriceListsPage } from './pages/manage/PriceListsPage'
+import { ProductsPage } from './pages/manage/ProductsPage'
 import {
   AdditivesPage,
   LossReasonsPage,
@@ -18,12 +23,22 @@ import {
 import { UsersPage } from './pages/manage/UsersPage'
 import { VesselsPage } from './pages/manage/VesselsPage'
 import { ReadyForSalePage } from './pages/ready/ReadyForSalePage'
+import { SaleDetailPage } from './pages/sales/SaleDetailPage'
+import { SalesPage } from './pages/sales/SalesPage'
+import { StockPage } from './pages/stock/StockPage'
+import { StockTakePage } from './pages/stock/StockTakePage'
+import { TransfersPage } from './pages/stock/TransfersPage'
 import { TanksPage } from './pages/tanks/TanksPage'
 import { TraceIndex } from './pages/trace/TraceIndex'
+import { XeroPage } from './pages/xero/XeroPage'
 import type { ReactNode } from 'react'
 
 const AdminOnly = ({ children }: { children: ReactNode }) => (
   <RequireRole roles={['admin']}>{children}</RequireRole>
+)
+// Tanks and Ready for sale are the cellar's; a seller doesn't see them.
+const CellarSide = ({ children }: { children: ReactNode }) => (
+  <RequireRole roles={['admin', 'cellar', 'viewer']}>{children}</RequireRole>
 )
 
 export function App() {
@@ -39,11 +54,11 @@ export function App() {
             </RequireAuth>
           }
         >
-          <Route index element={<Navigate to="/tanks" replace />} />
-          <Route path="/tanks" element={<TanksPage />} />
+          <Route index element={<HomeRedirect />} />
+          <Route path="/tanks" element={<CellarSide><TanksPage /></CellarSide>} />
           <Route path="/lots/:lotId" element={<LotPage />} />
           <Route path="/trace" element={<TraceIndex />} />
-          <Route path="/ready-for-sale" element={<ReadyForSalePage />} />
+          <Route path="/ready-for-sale" element={<CellarSide><ReadyForSalePage /></CellarSide>} />
           <Route path="/harvests/:harvestId" element={<HarvestPage />} />
           <Route
             path="/duty"
@@ -84,9 +99,28 @@ export function App() {
           <Route path="/manage/suppliers" element={<AdminOnly><SuppliersPage /></AdminOnly>} />
           <Route path="/manage/packaging" element={<AdminOnly><PackagingPage /></AdminOnly>} />
           <Route path="/manage/loss-reasons" element={<AdminOnly><LossReasonsPage /></AdminOnly>} />
+
+          <Route path="/stock" element={<StockPage />} />
+          <Route path="/sales" element={<SalesPage />} />
+          <Route path="/sales/:saleId" element={<SaleDetailPage />} />
+          <Route path="/transfers" element={<TransfersPage />} />
+          <Route
+            path="/stock-take"
+            element={
+              <RequireRole roles={['admin', 'seller']}>
+                <StockTakePage />
+              </RequireRole>
+            }
+          />
+          <Route path="/kegs" element={<KegsPage />} />
+          <Route path="/manage/products" element={<AdminOnly><ProductsPage /></AdminOnly>} />
+          <Route path="/manage/price-lists" element={<AdminOnly><PriceListsPage /></AdminOnly>} />
+          <Route path="/manage/locations" element={<AdminOnly><LocationsPage /></AdminOnly>} />
+          <Route path="/manage/customers" element={<AdminOnly><CustomersPage /></AdminOnly>} />
+          <Route path="/manage/xero" element={<AdminOnly><XeroPage /></AdminOnly>} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/tanks" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   )

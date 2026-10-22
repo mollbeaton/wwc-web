@@ -41,6 +41,10 @@
   color: inherit;
   font-size: 14px;
 }
+.withAction {
+  grid-template-columns: minmax(120px, 1.3fr) minmax(110px, 1fr) minmax(110px, 1fr) 104px 84px 96px 150px;
+  min-width: 800px;
+}
 .row:hover:not(.head) {
   background: var(--surface-2);
 }
@@ -117,9 +121,35 @@
   .cAbv {
     grid-area: abv;
   }
+  .withAction {
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'lot date'
+      'product volume'
+      'format abv'
+      'action action';
+  }
+  .cAction {
+    grid-area: action;
+    text-align: left;
+  }
   .dateLabel {
     display: inline;
   }
+}
+
+.cannerRow {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(0, 2fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+}
+.cannerRow:first-child {
+  border-top: none;
 }
 
 .more {

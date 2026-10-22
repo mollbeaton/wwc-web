@@ -13,6 +13,7 @@ const ROLES: { value: string; label: string; blurb: string }[] = [
   { value: 'admin', label: 'Admin', blurb: 'Everything, including management, duty filing and corrections.' },
   { value: 'cellar', label: 'Cellar', blurb: 'Captures production on iOS; sees Tanks and Trace.' },
   { value: 'viewer', label: 'Viewer', blurb: 'Read-only: Tanks, Trace and Duty. No changes.' },
+  { value: 'seller', label: 'Seller', blurb: 'Stock: sales, returns, transfers and stock takes. No cellar or duty.' },
 ]
 
 function roleLabel(role: string) {

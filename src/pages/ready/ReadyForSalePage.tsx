@@ -3,11 +3,14 @@ import { useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../../api/client'
 import { lotsApi, type Lot } from '../../api/lots'
+import { stockApi, type AwaitingRelease, type CannerAwaiting } from '../../api/stock'
+import { useAuth } from '../../auth/AuthContext'
 import { AbvTag } from '../../components/AbvTag'
 import { PageHeader } from '../../components/PageHeader'
 import { Segmented } from '../../components/Segmented'
 import { cap, fixed, lotKindLabel, shortDate } from '../../lib/format'
 import { isAwaitingRelease, isReady } from '../../lib/lotStatus'
+import { CannerReceiptModal, MarkReadyModal } from './MarkReadyModal'
 import styles from './ReadyForSalePage.module.css'
 
 /** Rows shown before "Show all" - the ready list only ever grows, since the
@@ -32,9 +35,17 @@ function byReadyDesc(a: Lot, b: Lot): number {
 }
 
 export function ReadyForSalePage() {
+  const { effectiveRole } = useAuth()
+  // Releasing is cellar work (the duty point); viewers only look.
+  const canRelease = effectiveRole === 'admin' || effectiveRole === 'cellar'
   const lots = useQuery({ queryKey: ['lots'], queryFn: lotsApi.list })
+  const awaitingRelease = useQuery({ queryKey: ['stock', 'awaiting-release'], queryFn: stockApi.awaitingRelease })
+  const canner = useQuery({ queryKey: ['stock', 'canner-awaiting'], queryFn: stockApi.cannerAwaiting })
   const [period, setPeriod] = useState<Period>('all')
   const [now] = useState(() => new Date())
+  const [releasing, setReleasing] = useState<AwaitingRelease | null>(null)
+  const [receiving, setReceiving] = useState<CannerAwaiting | null>(null)
+  const releasable = new Map((awaitingRelease.data ?? []).map((a) => [a.lot_id, a]))
 
   const all = lots.data ?? []
   const awaiting = all.filter(isAwaitingRelease).sort((a, b) => b.code.localeCompare(a.code))
@@ -89,7 +100,7 @@ export function ReadyForSalePage() {
           <Section
             title="Awaiting release"
             count={awaiting.length}
-            note="Bottled or boxed but not yet marked ready. Mark them ready in the cellar app."
+            note="Bottled or boxed but not yet marked ready. Mark them ready here or in the cellar app."
           >
             <LotTable
               label="Awaiting release"
@@ -98,10 +109,56 @@ export function ReadyForSalePage() {
               dateHeader="Labelled"
               date={(l) => (l.labelled_at ? shortDate(l.labelled_at) : 'Not yet')}
               volume={(l) => l.current_volume_l}
+              action={
+                canRelease
+                  ? (l) => {
+                      const release = releasable.get(l.id)
+                      return (
+                        release && (
+                          <button type="button" className="text-link" onClick={() => setReleasing(release)}>
+                            Mark ready for sale
+                          </button>
+                        )
+                      )
+                    }
+                  : undefined
+              }
             />
           </Section>
+
+          {(canner.data?.length ?? 0) > 0 && (
+            <Section
+              title="Cans back from canner"
+              count={canner.data!.length}
+              note="Sent to the canner and already released. Record the cans when they come back, and they go into stock."
+            >
+              <div className="card card--flush">
+                {canner.data!.map((c) => (
+                  <div key={c.lot_id} className={styles.cannerRow}>
+                    <span className={styles.lot}>
+                      <Link to={`/lots/${c.lot_id}`} className="mono">
+                        {c.lot_code}
+                      </Link>
+                      {c.name && <span className={styles.sub}>{c.name}</span>}
+                    </span>
+                    <span className={styles.sub}>
+                      {fixed(c.volume_l, 1)} L{c.canner && ` · ${c.canner}`} · sent {shortDate(c.sent_at)}
+                    </span>
+                    {canRelease && (
+                      <button type="button" className="text-link" onClick={() => setReceiving(c)}>
+                        Receive cans
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
         </>
       )}
+
+      {releasing && <MarkReadyModal lot={releasing} onClose={() => setReleasing(null)} />}
+      {receiving && <CannerReceiptModal lot={receiving} onClose={() => setReceiving(null)} />}
     </div>
   )
 }
@@ -142,6 +199,7 @@ function LotTable({
   dateHeader,
   date,
   volume,
+  action,
 }: {
   label: string
   lots: Lot[]
@@ -149,6 +207,9 @@ function LotTable({
   dateHeader: string
   date: (lot: Lot) => string
   volume: (lot: Lot) => string
+  /** A per-row action. The row then stops being one big link (a button can't
+   *  sit inside a link), and the lot code links instead. */
+  action?: (lot: Lot) => ReactNode
 }) {
   const [showAll, setShowAll] = useState(false)
   const visible = showAll ? lots : lots.slice(0, PREVIEW_ROWS)
@@ -158,18 +219,26 @@ function LotTable({
   return (
     <div className="card card--flush">
       <div className={styles.scroll} role="table" aria-label={label}>
-        <div className={`${styles.row} ${styles.head}`} role="row">
+        <div className={`${styles.row} ${styles.head} ${action ? styles.withAction : ''}`} role="row">
           <span role="columnheader">Lot</span>
           <span role="columnheader">Product</span>
           <span role="columnheader">Format</span>
           <span role="columnheader" className={styles.num}>ABV</span>
           <span role="columnheader" className={styles.num}>Volume</span>
           <span role="columnheader" className={styles.num}>{dateHeader}</span>
+          {action && <span role="columnheader" />}
         </div>
-        {visible.map((lot) => (
-          <Link key={lot.id} to={`/lots/${lot.id}`} className={styles.row} role="row">
+        {visible.map((lot) => {
+          const cells = (
+          <>
             <span role="cell" className={`${styles.lot} ${styles.cLot}`}>
-              <span className="mono">{lot.code}</span>
+              {action ? (
+                <Link to={`/lots/${lot.id}`} className="mono">
+                  {lot.code}
+                </Link>
+              ) : (
+                <span className="mono">{lot.code}</span>
+              )}
               {lot.name && <span className={styles.sub}>{lot.name}</span>}
             </span>
             <span role="cell" className={styles.cProduct}>
@@ -200,8 +269,21 @@ function LotTable({
               <span className={styles.dateLabel}>{dateHeader} </span>
               {date(lot)}
             </span>
-          </Link>
-        ))}
+          </>
+          )
+          return action ? (
+            <div key={lot.id} className={`${styles.row} ${styles.withAction}`} role="row">
+              {cells}
+              <span role="cell" className={`${styles.num} ${styles.cAction}`}>
+                {action(lot)}
+              </span>
+            </div>
+          ) : (
+            <Link key={lot.id} to={`/lots/${lot.id}`} className={styles.row} role="row">
+              {cells}
+            </Link>
+          )
+        })}
       </div>
       {lots.length > PREVIEW_ROWS && (
         <div className={styles.more}>

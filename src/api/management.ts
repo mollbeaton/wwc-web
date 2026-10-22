@@ -1,4 +1,5 @@
 import { api } from './client'
+import type { Role } from './types'
 
 export interface ChangeLogEntry {
   id: string
@@ -14,7 +15,7 @@ export interface User {
   id: string
   email: string
   name: string | null
-  role: 'admin' | 'cellar' | 'viewer'
+  role: Role
   status: 'active' | 'deactivated'
   last_sign_in_at: string | null
 }

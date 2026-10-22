@@ -9,6 +9,7 @@ const ROLE_LABELS: Record<Role, string> = {
   admin: 'Admin',
   cellar: 'Cellar',
   viewer: 'Viewer',
+  seller: 'Seller',
 }
 
 export function TopBar({ onOpenNav }: { onOpenNav: () => void }) {
