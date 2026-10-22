@@ -11,6 +11,9 @@ export interface XeroAccounts {
   production_clearing: string
   write_off: string
   opening_clearing: string
+  samples: string
+  gifts: string
+  staff: string
 }
 
 export interface XeroStatus {
@@ -76,6 +79,8 @@ export interface FakeXeroDocLine {
   unit_amount: string
   account_code: string | null
   cogs: string | null
+  /** Tracking categories on the line, e.g. Location: Bristol Cider Festival. */
+  tracking?: { name: string; option: string }[]
 }
 
 export interface FakeXeroDocument {

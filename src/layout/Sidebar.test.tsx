@@ -83,15 +83,16 @@ describe('Sidebar role visibility', () => {
     mockedUseAuth.mockReturnValue(auth({ id: '4', email: 's@b.co', role: 'seller' }))
     render('/stock')
     expect(screen.getByText('Stock', { selector: 'div' })).toBeInTheDocument()
-    expect(links()).toEqual(['Trace', 'Stock', 'Sales', 'Transfers', 'Stock take', 'Kegs'])
+    expect(links()).toEqual(['Trace', 'Stock', 'Sales', 'Transfers', 'Stock take', 'Events', 'Kegs'])
     expect(screen.queryByText('Manage')).not.toBeInTheDocument()
   })
 
-  it('lets a viewer read the Stock pages but not the stock take', () => {
+  it('lets a viewer read the Stock pages but not the stock take or event close-out', () => {
     mockedUseAuth.mockReturnValue(auth({ id: '3', email: 'v@b.co', role: 'viewer' }))
     render('/stock')
     expect(links()).toEqual(expect.arrayContaining(['Tanks', 'Duty', 'Stock', 'Sales', 'Transfers', 'Kegs']))
     expect(links()).not.toContain('Stock take')
+    expect(links()).not.toContain('Events')
   })
 
   it('gives an admin the new Manage pages', () => {

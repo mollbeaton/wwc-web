@@ -48,6 +48,9 @@ const ACCOUNT_FIELDS: { key: keyof XeroAccounts; label: string }[] = [
   { key: 'production_clearing', label: 'Production clearing' },
   { key: 'write_off', label: 'Write-off' },
   { key: 'opening_clearing', label: 'Opening balance clearing' },
+  { key: 'samples', label: 'Samples (tastings)' },
+  { key: 'gifts', label: 'Gifts' },
+  { key: 'staff', label: 'Staff / own use' },
 ]
 
 /** Admin's view of the Xero sync: the connection and its settings, the job
@@ -451,7 +454,18 @@ function XeroHoldsSection() {
               {d.lines.map((l, i) => (
                 <div key={i} className={styles.miniRow} style={{ gridTemplateColumns: '90px 1fr 50px 80px 70px 80px' }}>
                   <span className="mono">{l.item_code ?? '—'}</span>
-                  <span className={styles.sub}>{l.description}</span>
+                  <span className={styles.cell}>
+                    <span className={styles.sub}>{l.description}</span>
+                    {(l.tracking ?? []).length > 0 && (
+                      <span className={styles.chips}>
+                        {l.tracking!.map((t) => (
+                          <span key={`${t.name}:${t.option}`} className={styles.chip}>
+                            {t.name}: {t.option}
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                  </span>
                   <span className={`mono ${styles.num}`}>{l.quantity}</span>
                   <span className={`mono ${styles.num}`}>{gbp(l.unit_amount)}</span>
                   <span className={`mono ${styles.sub}`}>{l.account_code ?? ''}</span>

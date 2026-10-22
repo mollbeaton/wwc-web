@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
-import { stockApi, type StockRow } from '../../api/stock'
+import { stockApi, type StockRow, type WriteOffReason } from '../../api/stock'
 import { Modal, ModalActions } from '../../components/Modal'
 import { errorText, nowIso, positiveInt } from '../../lib/stock'
 import { availableAt, locationsHolding, lotsAt } from './stockPicking'
+import { WriteOffReasonPicker } from './WriteOffReasonPicker'
 import styles from './Stock.module.css'
 
-/** Units broken or written off at a location. Without a lot, the API takes
- *  them from the oldest lot there. */
-export function BreakageModal({ stock, onClose }: { stock: StockRow[]; onClose: () => void }) {
+/** Stock that leaves without being sold: tastings, gifts, breakage, staff.
+ *  The reason decides which Xero account it lands in, so it has no default.
+ *  Without a lot, the API takes the units from the oldest lot there. */
+export function WriteOffModal({ stock, onClose }: { stock: StockRow[]; onClose: () => void }) {
   const queryClient = useQueryClient()
   const inStock = stock.filter((r) => r.on_hand > 0)
   const [productId, setProductId] = useState(inStock[0]?.product_id ?? '')
@@ -16,32 +18,34 @@ export function BreakageModal({ stock, onClose }: { stock: StockRow[]; onClose: 
   const [locationId, setLocationId] = useState(locationsHolding(row)[0]?.location_id ?? '')
   const [lotId, setLotId] = useState('')
   const [qty, setQty] = useState('')
-  const [reason, setReason] = useState('')
+  const [reason, setReason] = useState<WriteOffReason | null>(null)
+  const [note, setNote] = useState('')
   const [error, setError] = useState<string | null>(null)
   // Minted once when the dialog opens: a retry after a failure resends it, so
-  // the API can't record the breakage twice.
+  // the API can't record the write-off twice.
   const [id] = useState(() => crypto.randomUUID())
 
   const available = availableAt(row, locationId, lotId)
   const units = positiveInt(qty)
-  const valid = !!productId && !!locationId && units != null && units <= available && reason.trim() !== ''
+  const valid = !!productId && !!locationId && units != null && units <= available && reason != null
 
   const save = useMutation({
     mutationFn: () =>
-      stockApi.breakage({
+      stockApi.writeOff({
         id,
         product_id: productId,
         lot_id: lotId || undefined,
         location_id: locationId,
         qty: units!,
-        reason: reason.trim(),
+        reason: reason!,
+        ...(note.trim() ? { note: note.trim() } : {}),
         occurred_at: nowIso(),
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['stock'] })
       onClose()
     },
-    onError: (e) => setError(errorText(e, 'Could not record the breakage')),
+    onError: (e) => setError(errorText(e, 'Could not record the write-off')),
   })
 
   function onSubmit(e: FormEvent) {
@@ -51,7 +55,7 @@ export function BreakageModal({ stock, onClose }: { stock: StockRow[]; onClose: 
   }
 
   return (
-    <Modal title="Record breakage" onClose={onClose} dismissable={!save.isPending} as="form" onSubmit={onSubmit}>
+    <Modal title="Write off stock" onClose={onClose} dismissable={!save.isPending} as="form" onSubmit={onSubmit}>
       <label className={styles.field}>
         <span>Product</span>
         <select
@@ -100,13 +104,14 @@ export function BreakageModal({ stock, onClose }: { stock: StockRow[]; onClose: 
         </label>
       </div>
       <label className={styles.field}>
-        <span>Units broken</span>
+        <span>Units</span>
         <input type="number" min="1" step="1" max={available} value={qty} onChange={(e) => setQty(e.target.value)} />
       </label>
       {units != null && units > available && <p className={styles.error}>Only {available} there.</p>}
+      <WriteOffReasonPicker value={reason} onChange={setReason} />
       <label className={styles.field}>
-        <span>Reason</span>
-        <textarea rows={2} value={reason} onChange={(e) => setReason(e.target.value)} />
+        <span>Note (optional)</span>
+        <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
       </label>
 
       {error && (
@@ -119,7 +124,7 @@ export function BreakageModal({ stock, onClose }: { stock: StockRow[]; onClose: 
           Cancel
         </button>
         <button type="submit" className="btn btn--primary" disabled={!valid || save.isPending}>
-          {save.isPending ? 'Saving…' : 'Record breakage'}
+          {save.isPending ? 'Saving…' : 'Write off'}
         </button>
       </ModalActions>
     </Modal>

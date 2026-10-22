@@ -1,5 +1,5 @@
 import { ApiError } from '../api/client'
-import type { MovementType } from '../api/stock'
+import type { MovementType, StockMovement, WriteOffReason } from '../api/stock'
 
 /** The message to show for a failed request: the API's own detail when there
  *  is one (it explains domain rules, e.g. "only 4 in stock"), else `fallback`. */
@@ -28,7 +28,7 @@ const MOVEMENT_LABELS: Record<MovementType, string> = {
   released: 'Released',
   sold: 'Sold',
   returned: 'Returned',
-  broken: 'Breakage',
+  written_off: 'Written off',
   transfer_out: 'Transfer out',
   transfer_in: 'Transfer in',
   count_adjustment: 'Stock take',
@@ -37,6 +37,25 @@ const MOVEMENT_LABELS: Record<MovementType, string> = {
 
 export function movementLabel(type: MovementType): string {
   return MOVEMENT_LABELS[type] ?? type
+}
+
+/** The write-off reasons, in the order offered, with where each lands in Xero. */
+export const WRITE_OFF_REASONS: { value: WriteOffReason; label: string; short: string; hint: string }[] = [
+  { value: 'tasting', label: 'Tasting / samples', short: 'Tasting', hint: 'Posted to the samples account - a marketing cost.' },
+  { value: 'gift', label: 'Gift', short: 'Gift', hint: 'Posted to the gifts account.' },
+  {
+    value: 'breakage',
+    label: 'Breakage / spoiled',
+    short: 'Breakage',
+    hint: 'Posted to the write-off account - stock lost, not given.',
+  },
+  { value: 'own_use', label: 'Own use / staff', short: 'Own use', hint: 'Posted to the staff account.' },
+]
+
+/** "Written off · Tasting", or the plain movement label. */
+export function movementText(m: Pick<StockMovement, 'type' | 'write_off_reason'>): string {
+  const reason = m.write_off_reason && WRITE_OFF_REASONS.find((r) => r.value === m.write_off_reason)
+  return reason ? `${movementLabel(m.type)} · ${reason.short}` : movementLabel(m.type)
 }
 
 /** Now, as the API wants it - every write carries when it happened. */

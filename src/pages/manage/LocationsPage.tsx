@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { locationsApi, type LocationKind, type StockLocation } from '../../api/catalog'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { PageHeader } from '../../components/PageHeader'
@@ -8,10 +9,11 @@ import { errorText } from '../../lib/stock'
 import { ListState } from './ListState'
 import styles from './Management.module.css'
 
-const GRID = 'minmax(0, 1.6fr) 100px 90px 80px'
+const GRID = 'minmax(0, 1.6fr) 100px 90px 150px'
 
-/** Where stock is held: the cellar, the shop, and events. An event location
- *  is closed once the event is over (its stock transferred back first). */
+/** Where stock is held: the cellar, the shop, and events. An event is
+ *  normally closed by its close-out (count, write-offs, takings); plain Close
+ *  is for an event that never happened. */
 export function LocationsPage() {
   const queryClient = useQueryClient()
   const list = useQuery({ queryKey: ['locations'], queryFn: locationsApi.list })
@@ -49,16 +51,21 @@ export function LocationsPage() {
               </span>
               <span className={styles.num}>
                 {l.kind === 'event' && l.status === 'active' && (
-                  <button
-                    type="button"
-                    className="text-link"
-                    onClick={() => {
-                      close.reset()
-                      setClosing(l)
-                    }}
-                  >
-                    Close
-                  </button>
+                  <span style={{ display: 'inline-flex', gap: 12 }}>
+                    <Link to={`/stock/events/${l.id}/close-out`} className="text-link">
+                      Close out
+                    </Link>
+                    <button
+                      type="button"
+                      className="text-link"
+                      onClick={() => {
+                        close.reset()
+                        setClosing(l)
+                      }}
+                    >
+                      Close
+                    </button>
+                  </span>
                 )}
               </span>
             </div>

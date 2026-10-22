@@ -330,3 +330,80 @@
     padding: 12px 16px;
   }
 }
+
+/* Write-off reasons: radios with a line on where each lands in Xero. */
+.reasons {
+  border: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
+  gap: 8px;
+}
+.reasons legend {
+  padding: 0;
+  margin-bottom: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+.reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--r-input);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.reason input {
+  margin-top: 3px;
+  accent-color: var(--amber);
+}
+.reasonActive {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+}
+.reasonLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+.reason .hint {
+  display: block;
+}
+
+/* Event close-out: the money summary under the reconciliation. */
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  font-size: 14.5px;
+}
+.summaryRow:first-of-type {
+  border-top: none;
+}
+.explain {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--r-input);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.writeOffRow {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.4fr) 80px minmax(150px, 1fr) minmax(140px, 1.2fr) auto;
+  gap: 10px;
+  align-items: end;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 720px) {
+  .writeOffRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}

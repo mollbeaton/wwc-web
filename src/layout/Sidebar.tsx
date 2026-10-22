@@ -112,6 +112,7 @@ function NavItemLink({ item }: { item: NavItem }) {
   return (
     <NavLink
       to={item.to}
+      end={item.end}
       className={({ isActive }) => `${styles.item} ${isActive || inSection ? styles.active : ''}`}
     >
       <Icon size={19} stroke={1.75} />

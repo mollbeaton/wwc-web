@@ -3,7 +3,7 @@ import type { Role } from '../api/types'
 // Who may do what on the Stock pages. The API enforces all of this; these only
 // decide which buttons to show.
 
-/** Sales, returns, transfers, breakage, stock takes and keg returns. */
+/** Sales, returns, transfers, write-offs, stock takes, event close-outs and keg returns. */
 export function canSell(role: Role | null): boolean {
   return role === 'seller' || role === 'admin'
 }

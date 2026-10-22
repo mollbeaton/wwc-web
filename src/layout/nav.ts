@@ -7,6 +7,7 @@ import {
   IconBuildingStore,
   IconBuildingWarehouse,
   IconClipboardCheck,
+  IconCalendarEvent,
   IconCloudUpload,
   IconCurrencyPound,
   IconDroplet,
@@ -34,6 +35,8 @@ export interface NavItem {
   /** Other path prefixes that belong to this section, so it stays highlighted
    *  on pages that aren't its own route (e.g. a lot page is part of Trace). */
   alsoActiveFor?: string[]
+  /** Only highlight on this exact path, not the pages under it. */
+  end?: boolean
 }
 
 /** The cellar side: everyone except a seller. */
@@ -58,10 +61,12 @@ export const MAIN_NAV: NavItem[] = [
 // transfers and stock takes are seller and admin work, so the stock take (a
 // page that only writes) is theirs alone.
 export const STOCK_NAV: NavItem[] = [
-  { to: '/stock', label: 'Stock', icon: IconPackages, roles: ALL },
+  { to: '/stock', label: 'Stock', icon: IconPackages, roles: ALL, end: true },
   { to: '/sales', label: 'Sales', icon: IconReceipt, roles: ALL },
   { to: '/transfers', label: 'Transfers', icon: IconArrowsExchange, roles: ALL },
   { to: '/stock-take', label: 'Stock take', icon: IconClipboardCheck, roles: ['admin', 'seller'] },
+  // Closing an event out writes stock and books a sale, so it's theirs too.
+  { to: '/stock/events', label: 'Events', icon: IconCalendarEvent, roles: ['admin', 'seller'] },
   { to: '/kegs', label: 'Kegs', icon: IconBeer, roles: ALL },
 ]
 

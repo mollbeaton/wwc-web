@@ -25,6 +25,8 @@ import { VesselsPage } from './pages/manage/VesselsPage'
 import { ReadyForSalePage } from './pages/ready/ReadyForSalePage'
 import { SaleDetailPage } from './pages/sales/SaleDetailPage'
 import { SalesPage } from './pages/sales/SalesPage'
+import { CloseOutPage } from './pages/stock/CloseOutPage'
+import { EventsPage } from './pages/stock/EventsPage'
 import { StockPage } from './pages/stock/StockPage'
 import { StockTakePage } from './pages/stock/StockTakePage'
 import { TransfersPage } from './pages/stock/TransfersPage'
@@ -109,6 +111,22 @@ export function App() {
             element={
               <RequireRole roles={['admin', 'seller']}>
                 <StockTakePage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/stock/events"
+            element={
+              <RequireRole roles={['admin', 'seller']}>
+                <EventsPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/stock/events/:locationId/close-out"
+            element={
+              <RequireRole roles={['admin', 'seller']}>
+                <CloseOutPage />
               </RequireRole>
             }
           />

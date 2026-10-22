@@ -7,8 +7,8 @@ import { useAuth } from '../../auth/AuthContext'
 import { canSell } from '../../auth/roles'
 import { PageHeader } from '../../components/PageHeader'
 import { lotKindLabel, shortDate } from '../../lib/format'
-import { dateTime, errorText, movementLabel, signed } from '../../lib/stock'
-import { BreakageModal } from './BreakageModal'
+import { dateTime, errorText, movementText, signed } from '../../lib/stock'
+import { WriteOffModal } from './WriteOffModal'
 import { SyncBadge } from './SyncBadge'
 import styles from './Stock.module.css'
 
@@ -20,7 +20,7 @@ export function StockPage() {
   const { effectiveRole } = useAuth()
   const stock = useQuery({ queryKey: ['stock'], queryFn: stockApi.list })
   const [expanded, setExpanded] = useState<string | null>(null)
-  const [recordingBreakage, setRecordingBreakage] = useState(false)
+  const [writingOff, setWritingOff] = useState(false)
 
   const rows = stock.data ?? []
   const totalUnits = rows.reduce((sum, r) => sum + r.on_hand, 0)
@@ -32,8 +32,8 @@ export function StockPage() {
         subtitle="Finished stock on hand, where it is, and what Xero holds"
         actions={
           canSell(effectiveRole) && (
-            <button className="btn" onClick={() => setRecordingBreakage(true)} disabled={rows.length === 0}>
-              Record breakage
+            <button className="btn" onClick={() => setWritingOff(true)} disabled={rows.length === 0}>
+              Write off
             </button>
           )
         }
@@ -90,7 +90,7 @@ export function StockPage() {
         </section>
       )}
 
-      {recordingBreakage && <BreakageModal stock={rows} onClose={() => setRecordingBreakage(false)} />}
+      {writingOff && <WriteOffModal stock={rows} onClose={() => setWritingOff(false)} />}
     </div>
   )
 }
@@ -172,7 +172,7 @@ function ProductDetail({ row }: { row: StockRow }) {
           <div key={m.id} className={styles.miniRow} style={{ gridTemplateColumns: '100px 1fr 1fr 50px' }}>
             <span className="muted">{dateTime(m.occurred_at)}</span>
             <span className={styles.cell}>
-              {movementLabel(m.type)}
+              {movementText(m)}
               <span className={styles.sub}>
                 {m.sale_id ? (
                   <Link to={`/sales/${m.sale_id}`} className="text-link">

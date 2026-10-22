@@ -41,7 +41,7 @@ export type MovementType =
   | 'released'
   | 'sold'
   | 'returned'
-  | 'broken'
+  | 'written_off'
   | 'transfer_out'
   | 'transfer_in'
   | 'count_adjustment'
@@ -62,7 +62,12 @@ export interface StockMovement {
   sale_id: string | null
   sale_reference: string | null
   recorded_by_email: string | null
+  /** Set on a `written_off` movement. */
+  write_off_reason: WriteOffReason | null
 }
+
+/** Why stock was written off. Each goes to its own Xero account. */
+export type WriteOffReason = 'tasting' | 'gift' | 'breakage' | 'own_use'
 
 export interface AwaitingRelease {
   lot_id: string
@@ -102,13 +107,14 @@ export interface TransferInput {
   occurred_at: string
 }
 
-export interface BreakageInput {
+export interface WriteOffInput {
   id: string
   product_id: string
   lot_id?: string
   location_id: string
   qty: number
-  reason: string
+  reason: WriteOffReason
+  note?: string
   occurred_at: string
 }
 
@@ -161,6 +167,6 @@ export const stockApi = {
   cannerAwaiting: () => api.get<CannerAwaiting[]>('/stock/canner-awaiting-receipt'),
   receiveCans: (body: CannerReceiptInput) => api.post<unknown>('/stock/canner-receipts', body),
   transfer: (body: TransferInput) => api.post<unknown>('/stock/transfers', body),
-  breakage: (body: BreakageInput) => api.post<unknown>('/stock/breakages', body),
+  writeOff: (body: WriteOffInput) => api.post<unknown>('/stock/write-offs', body),
   take: (body: StockTakeInput) => api.post<StockTakeResult>('/stock/takes', body),
 }

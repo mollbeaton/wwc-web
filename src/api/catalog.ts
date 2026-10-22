@@ -1,4 +1,5 @@
 import { api } from './client'
+import type { WriteOffReason } from './stock'
 
 // What the business sells and who to: products, price lists, stock locations
 // and customers. Money is a decimal string ex VAT, as everywhere else.
@@ -107,11 +108,54 @@ export const priceListsApi = {
     api.put<PriceList>(`/price-lists/${id}/items`, { items }),
 }
 
+/** An event's close-out: what came back, what was written off, and the
+ *  takings. Lots at the event left out of `counts` are taken to have none
+ *  left. Takings are a decimal string in GBP. */
+export interface CloseOutBody {
+  customer_id: string
+  takings: string
+  counts: { lot_id: string; returned: number }[]
+  write_offs: { product_id: string; qty: number; reason: WriteOffReason; note?: string }[]
+}
+
+export interface CloseOutLine {
+  product_id: string
+  code: string
+  name: string
+  at_event: number
+  returned: number
+  written_off: number
+  /** at_event - returned - written_off */
+  sold: number
+  unit_price: string
+  value: string
+}
+
+export interface CloseOutPreview {
+  lines: CloseOutLine[]
+  expected_takings: string
+  takings: string
+  /** takings - expected_takings */
+  difference: string
+}
+
+export interface CloseOutResult {
+  id: string
+  location_id: string
+  takings: string
+  expected_takings: string
+  sale_id: string
+}
+
 export const locationsApi = {
   list: () => api.get<StockLocation[]>('/locations'),
   create: (body: { id: string; name: string; kind: LocationKind }) =>
     api.post<StockLocation>('/locations', body),
   close: (id: string) => api.post<StockLocation>(`/locations/${id}/close`),
+  closeOutPreview: (id: string, body: CloseOutBody, signal?: AbortSignal) =>
+    api.post<CloseOutPreview>(`/locations/${id}/close-out/preview`, body, { signal }),
+  closeOut: (id: string, body: CloseOutBody & { id: string; occurred_at: string }) =>
+    api.post<CloseOutResult>(`/locations/${id}/close-out`, body),
 }
 
 export const customersApi = {
